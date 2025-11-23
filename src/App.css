@@ -1,0 +1,691 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  font-family:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html,
+body {
+  overflow: hidden;
+  background: transparent !important;
+  margin: 0;
+  padding: 0;
+}
+
+.launchpad {
+  width: 100vw;
+  height: 100vh;
+  background: transparent !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px;
+  overflow: hidden;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Search Bar */
+.search-container {
+  width: 100%;
+  max-width: 600px;
+  margin-bottom: 40px;
+  z-index: 10;
+}
+
+.search-input {
+  width: 100%;
+  padding: 14px 24px;
+  font-size: 18px;
+  border: none;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  outline: none;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.search-input:focus {
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.15);
+}
+
+/* Apps Grid */
+.apps-grid {
+  display: grid;
+  /* grid-template-columns is set dynamically via inline style */
+  gap: 32px 24px;
+  width: 100%;
+  max-width: 1400px;
+  padding: 20px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  justify-items: center;
+  align-content: start;
+}
+
+.apps-grid.full-width {
+  max-width: 95vw;
+  padding: 20px 40px;
+}
+
+/* Hide scrollbar but allow scrolling */
+.apps-grid::-webkit-scrollbar {
+  display: none;
+}
+
+.apps-grid {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* App Item */
+.app-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  user-select: none;
+  width: 120px;
+}
+
+.app-item:hover {
+  transform: scale(1.08);
+}
+
+.app-item:active {
+  transform: scale(0.95);
+}
+
+/* App Icon */
+.app-icon {
+  width: 96px;
+  height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+  transition: all 0.2s ease;
+}
+
+.app-item:hover .app-icon {
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.app-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.app-icon-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 42px;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.6);
+  background: linear-gradient(135deg, rgba(100, 100, 150, 0.3), rgba(150, 100, 200, 0.3));
+}
+
+/* App Name */
+.app-name {
+  font-size: 13px;
+  color: white;
+  text-align: center;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  font-weight: 400;
+  letter-spacing: -0.2px;
+  user-select: none;
+}
+
+/* Loading State */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 50vh;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 18px;
+}
+
+/* Error State */
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  height: 50vh;
+  color: rgba(255, 100, 100, 0.9);
+  font-size: 16px;
+}
+
+.error button {
+  padding: 10px 24px;
+  font-size: 14px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.error button:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* No Results */
+.no-results {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 50vh;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 16px;
+}
+
+/* Drag and Drop */
+.app-item {
+  cursor: grab;
+}
+
+.app-item:active {
+  cursor: grabbing;
+}
+
+.app-item.dragging {
+  opacity: 0.3;
+  transform: scale(0.9);
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.app-item.drag-over {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  transform: scale(1.05);
+}
+
+.app-item[draggable="true"]:hover {
+  cursor: grab;
+}
+
+/* Page Indicators */
+.page-indicators {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  z-index: 100;
+  padding: 12px 20px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.page-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+.page-dot:hover {
+  background: rgba(255, 255, 255, 0.6);
+  transform: scale(1.2);
+}
+
+.page-dot.active {
+  background: rgba(255, 255, 255, 0.9);
+  transform: scale(1.3);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+}
+
+/* Folders */
+.folder-item {
+  position: relative;
+}
+
+.folder-icon {
+  width: 96px;
+  height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(100, 150, 200, 0.3), rgba(150, 100, 200, 0.3));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.folder-mini-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 4px;
+  padding: 8px;
+  width: 100%;
+  height: 100%;
+}
+
+.folder-mini-icon {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.folder-mini-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.mini-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Folder Modal */
+.folder-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.folder-content {
+  background: rgba(30, 30, 40, 0.95);
+  border-radius: 24px;
+  padding: 32px;
+  max-width: 800px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.folder-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  gap: 16px;
+}
+
+.folder-name-input {
+  flex: 1;
+  font-size: 24px;
+  font-weight: 500;
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 12px 20px;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.folder-name-input:focus {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.delete-folder {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 100, 100, 0.2);
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  line-height: 1;
+  padding: 0;
+}
+
+.delete-folder:hover {
+  background: rgba(255, 100, 100, 0.4);
+  transform: scale(1.1);
+}
+
+.close-folder {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 28px;
+  font-weight: 300;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  line-height: 1;
+  padding: 0;
+}
+
+.close-folder:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.folder-apps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 20px 16px;
+  padding: 12px;
+  min-width: 600px;
+}
+
+.folder-apps-grid .app-item {
+  cursor: pointer;
+  width: auto;
+}
+
+/* Hide scrollbar in folder modal */
+.folder-content::-webkit-scrollbar {
+  display: none;
+}
+
+.folder-content {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Context Menu */
+.context-menu {
+  position: fixed;
+  background: rgba(40, 40, 50, 0.98);
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 2000;
+  animation: fadeIn 0.15s ease;
+  min-width: 180px;
+}
+
+.context-menu button {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  text-align: left;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+  font-weight: 400;
+}
+
+.context-menu button:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Grid Settings Modal */
+.grid-settings-modal {
+  max-width: 500px;
+}
+
+.grid-settings-header {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: white;
+}
+
+.grid-settings-content {
+  padding: 24px 0;
+}
+
+.grid-setting-item {
+  margin-bottom: 24px;
+}
+
+.grid-setting-label {
+  display: block;
+  margin-bottom: 12px;
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 500;
+}
+
+.grid-setting-slider {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.15);
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+.grid-setting-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+}
+
+.grid-setting-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+}
+
+.grid-setting-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+}
+
+.grid-setting-slider::-moz-range-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+}
+
+.grid-setting-info {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.grid-setting-info p {
+  margin: 0;
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+}
+
+.grid-save-button {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+}
+
+.grid-save-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.grid-save-button:active {
+  transform: translateY(0);
+}
+
+/* Delete Confirmation Modal */
+.delete-confirmation-modal {
+  max-width: 450px;
+}
+
+.delete-confirmation-content {
+  padding: 20px 0;
+}
+
+.delete-confirmation-content p {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.95);
+  text-align: center;
+}
+
+.delete-confirmation-note {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 24px !important;
+}
+
+.delete-confirmation-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.delete-confirmation-cancel,
+.delete-confirmation-confirm {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.delete-confirmation-cancel {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+}
+
+.delete-confirmation-cancel:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+}
+
+.delete-confirmation-confirm {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+  color: white;
+}
+
+.delete-confirmation-confirm:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+}
+
+.delete-confirmation-cancel:active,
+.delete-confirmation-confirm:active {
+  transform: translateY(0);
+}
