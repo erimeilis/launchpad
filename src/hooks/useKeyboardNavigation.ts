@@ -13,6 +13,12 @@ interface UseKeyboardNavigationProps {
   setOpenFolder: (folder: null) => void;
   deleteConfirmation: DeleteConfirmationState | null;
   setDeleteConfirmation: (confirmation: null) => void;
+  editMode?: boolean;
+  setEditMode?: (mode: boolean) => void;
+  trashConfirmation?: unknown;
+  setTrashConfirmation?: (confirmation: null) => void;
+  appContextMenu?: unknown;
+  setAppContextMenu?: (menu: null) => void;
 }
 
 /**
@@ -30,6 +36,12 @@ export function useKeyboardNavigation({
   setOpenFolder,
   deleteConfirmation,
   setDeleteConfirmation,
+  editMode,
+  setEditMode,
+  trashConfirmation,
+  setTrashConfirmation,
+  appContextMenu,
+  setAppContextMenu,
 }: UseKeyboardNavigationProps) {
   // Keyboard navigation
   useEffect(() => {
@@ -37,6 +49,10 @@ export function useKeyboardNavigation({
       // Handle Escape key
       if (e.key === "Escape") {
         // Close modals in priority order
+        if (trashConfirmation && setTrashConfirmation) {
+          setTrashConfirmation(null);
+          return;
+        }
         if (deleteConfirmation) {
           setDeleteConfirmation(null);
           return;
@@ -47,6 +63,14 @@ export function useKeyboardNavigation({
         }
         if (openFolder) {
           setOpenFolder(null);
+          return;
+        }
+        if (appContextMenu && setAppContextMenu) {
+          setAppContextMenu(null);
+          return;
+        }
+        if (editMode && setEditMode) {
+          setEditMode(false);
           return;
         }
 
@@ -84,10 +108,16 @@ export function useKeyboardNavigation({
     showGridSettings,
     openFolder,
     deleteConfirmation,
+    editMode,
+    trashConfirmation,
+    appContextMenu,
     setCurrentPage,
     setShowGridSettings,
     setOpenFolder,
     setDeleteConfirmation,
+    setEditMode,
+    setTrashConfirmation,
+    setAppContextMenu,
   ]);
 
   // Mouse wheel for page navigation

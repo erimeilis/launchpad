@@ -20,8 +20,10 @@ import { PageIndicators } from "./components/PageIndicators";
 import { DragGhost } from "./components/DragGhost";
 import { EdgeIndicators } from "./components/EdgeIndicators";
 import { ContextMenu } from "./components/ContextMenu";
+import { AppContextMenu } from "./components/AppContextMenu";
 import { GridSettings } from "./components/GridSettings";
 import { DeleteConfirmation } from "./components/DeleteConfirmation";
+import { TrashConfirmation } from "./components/TrashConfirmation";
 
 function App() {
   // App management state and functions
@@ -54,11 +56,27 @@ function App() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
+  const [appContextMenu, setAppContextMenu] = useState<{
+    x: number;
+    y: number;
+    appName: string;
+    appPath: string;
+    bundleId: string;
+  } | null>(null);
   const [showGridSettings, setShowGridSettings] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState<{
     folderId: string;
     folderName: string;
   } | null>(null);
+  const [trashConfirmation, setTrashConfirmation] = useState<{
+    appName: string;
+    appPath: string;
+  } | null>(null);
+  const [editMode, setEditMode] = useState(false);
+  const [hiddenApps, setHiddenApps] = useState<Set<string>>(() => {
+    const saved = localStorage.getItem("launchpad-hidden-apps");
+    return saved ? new Set(JSON.parse(saved)) : new Set();
+  });
 
   // Grid settings
   const [gridSettings, setGridSettings] = useState<GridSettingsType>(() => {
@@ -109,9 +127,15 @@ function App() {
     saveFolders,
   });
 
-  // Filter items based on search
+  // Filter out hidden apps from items
+  const visibleItems = items.filter((item) => {
+    if (isFolder(item)) return true; // Never hide folders
+    return !hiddenApps.has(item.bundle_id);
+  });
+
+  // Use visibleItems instead of items for display
   const filteredItems = searchQuery
-    ? items.filter((item) => {
+    ? visibleItems.filter((item) => {
         if (isFolder(item)) {
           return (
             item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -121,7 +145,7 @@ function App() {
           return item.name.toLowerCase().includes(searchQuery.toLowerCase());
         }
       })
-    : items;
+    : visibleItems;
 
   // Create preview items array while dragging
   const displayItems = (() => {
@@ -152,6 +176,12 @@ function App() {
     setOpenFolder,
     deleteConfirmation,
     setDeleteConfirmation,
+    editMode,
+    setEditMode,
+    trashConfirmation,
+    setTrashConfirmation,
+    appContextMenu,
+    setAppContextMenu,
   });
 
   // Merge apps and folders into items array
@@ -175,14 +205,17 @@ function App() {
     setCurrentPage(0);
   }, [searchQuery]);
 
-  // Close context menu on click outside
+  // Close context menus on click outside
   useEffect(() => {
-    const handleClick = () => setContextMenu(null);
-    if (contextMenu) {
+    const handleClick = () => {
+      setContextMenu(null);
+      setAppContextMenu(null);
+    };
+    if (contextMenu || appContextMenu) {
       window.addEventListener("click", handleClick);
       return () => window.removeEventListener("click", handleClick);
     }
-  }, [contextMenu]);
+  }, [contextMenu, appContextMenu]);
 
   // Context menu handler
   function handleContextMenu(e: React.MouseEvent) {
@@ -190,10 +223,74 @@ function App() {
     setContextMenu({ x: e.clientX, y: e.clientY });
   }
 
+  // Toggle edit mode
+  function toggleEditMode() {
+    setEditMode(!editMode);
+    setContextMenu(null);
+  }
+
   // Save grid settings
   function saveGridSettings() {
     localStorage.setItem("launchpad-grid-settings", JSON.stringify(gridSettings));
     setShowGridSettings(false);
+  }
+
+  // Sort all items alphabetically
+  function sortAlphabetically() {
+    const sorted = [...items].sort((a, b) =>
+      a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+    );
+    setItems(sorted);
+    saveItemOrder(sorted);
+    setCurrentPage(0);
+  }
+
+  // Hide app from Launchpad
+  function hideApp(bundleId: string) {
+    const newHidden = new Set(hiddenApps);
+    newHidden.add(bundleId);
+    setHiddenApps(newHidden);
+    localStorage.setItem("launchpad-hidden-apps", JSON.stringify(Array.from(newHidden)));
+  }
+
+  // Handle app right-click
+  function handleAppContextMenu(e: React.MouseEvent, app: any) {
+    e.preventDefault();
+    e.stopPropagation();
+    setAppContextMenu({
+      x: e.clientX,
+      y: e.clientY,
+      appName: app.name,
+      appPath: app.path,
+      bundleId: app.bundle_id,
+    });
+  }
+
+  // App context menu actions
+  async function revealInFinder(appPath: string) {
+    const { invoke } = await import("@tauri-apps/api/core");
+    try {
+      await invoke("reveal_in_finder", { appPath });
+    } catch (error) {
+      console.error("Failed to reveal in Finder:", error);
+    }
+  }
+
+  async function confirmMoveToTrash(appName: string, appPath: string) {
+    setTrashConfirmation({ appName, appPath });
+  }
+
+  async function moveToTrash(appPath: string) {
+    const { invoke } = await import("@tauri-apps/api/core");
+    try {
+      await invoke("move_app_to_trash", { appPath });
+      // Reload apps list after deletion
+      await loadApps();
+      setTrashConfirmation(null);
+    } catch (error) {
+      console.error("Failed to move app to trash:", error);
+      alert(`Failed to move app to trash: ${error}`);
+    }
   }
 
   return (
@@ -276,21 +373,24 @@ function App() {
                     app={item}
                     isDragging={isDraggingThis}
                     isDragOver={isDragOverThis}
+                    editMode={editMode}
                     onLaunch={launchApp}
+                    onRemove={hideApp}
+                    onContextMenu={(e) => handleAppContextMenu(e, item)}
                     onMouseDown={(e) => {
-                      if (e.button !== 0) return;
+                      if (e.button !== 0 || editMode) return;
                       const globalIndex = startIndex + index;
                       setMouseDownPos({ x: e.clientX, y: e.clientY });
                       setMouseDownItem({ index: globalIndex, item });
                     }}
                     onMouseEnter={() => {
-                      if (isDragging && draggedItem) {
+                      if (isDragging && draggedItem && !editMode) {
                         const globalIndex = startIndex + index;
                         setDragOverIndex(globalIndex);
                       }
                     }}
                     onMouseUp={() => {
-                      if (isDragging && draggedItem && dragOverIndex !== null) {
+                      if (isDragging && draggedItem && dragOverIndex !== null && !editMode) {
                         handleDrop(null as any, index, item);
                       }
                     }}
@@ -349,6 +449,12 @@ function App() {
             setShowGridSettings(true);
             setContextMenu(null);
           }}
+          onSortAlphabetically={() => {
+            sortAlphabetically();
+            setContextMenu(null);
+          }}
+          onEditApps={toggleEditMode}
+          editMode={editMode}
         />
       )}
 
@@ -371,6 +477,28 @@ function App() {
             setDeleteConfirmation(null);
           }}
           onCancel={() => setDeleteConfirmation(null)}
+        />
+      )}
+
+      {/* App Context Menu */}
+      {appContextMenu && (
+        <AppContextMenu
+          position={{ x: appContextMenu.x, y: appContextMenu.y }}
+          appName={appContextMenu.appName}
+          onOpen={() => launchApp(appContextMenu.appPath)}
+          onRevealInFinder={() => revealInFinder(appContextMenu.appPath)}
+          onMoveToTrash={() => confirmMoveToTrash(appContextMenu.appName, appContextMenu.appPath)}
+          onHideFromLaunchpad={() => hideApp(appContextMenu.bundleId)}
+          onClose={() => setAppContextMenu(null)}
+        />
+      )}
+
+      {/* Trash Confirmation Modal */}
+      {trashConfirmation && (
+        <TrashConfirmation
+          appName={trashConfirmation.appName}
+          onConfirm={() => moveToTrash(trashConfirmation.appPath)}
+          onCancel={() => setTrashConfirmation(null)}
         />
       )}
     </div>

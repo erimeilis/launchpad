@@ -110,6 +110,7 @@ body {
   transition: transform 0.2s ease;
   user-select: none;
   width: 120px;
+  position: relative;
 }
 
 .app-item:hover {
@@ -117,6 +118,58 @@ body {
 }
 
 .app-item:active {
+  transform: scale(0.95);
+}
+
+/* Edit Mode - Jiggle Animation */
+.app-item.jiggle {
+  animation: jiggle 0.3s ease-in-out infinite;
+}
+
+@keyframes jiggle {
+  0%, 100% {
+    transform: rotate(-1deg);
+  }
+  50% {
+    transform: rotate(1deg);
+  }
+}
+
+.app-item.jiggle:hover {
+  transform: scale(1.08) rotate(-1deg);
+}
+
+/* Remove Button (X) */
+.app-remove-button {
+  position: absolute;
+  top: -6px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(255, 59, 48, 0.95);
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  padding: 0;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.app-remove-button:hover {
+  transform: scale(1.15);
+  background: rgba(255, 69, 58, 1);
+  box-shadow: 0 3px 12px rgba(255, 59, 48, 0.5);
+}
+
+.app-remove-button:active {
   transform: scale(0.95);
 }
 
@@ -483,72 +536,186 @@ body {
 }
 
 /* Context Menu */
+/* Context Menu - macOS Tahoe Style */
 .context-menu {
   position: fixed;
-  background: rgba(40, 40, 50, 0.98);
-  border-radius: 12px;
-  padding: 8px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(50, 50, 58, 0.85);
+  border-radius: 10px;
+  padding: 6px;
+  box-shadow:
+    0 0 0 0.5px rgba(255, 255, 255, 0.15),
+    0 10px 30px rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(60px) saturate(180%);
+  -webkit-backdrop-filter: blur(60px) saturate(180%);
   z-index: 2000;
-  animation: fadeIn 0.15s ease;
-  min-width: 180px;
+  animation: contextMenuFadeIn 0.12s cubic-bezier(0.16, 1, 0.3, 1);
+  min-width: 200px;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+}
+
+@keyframes contextMenuFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .context-menu button {
   display: block;
   width: 100%;
-  padding: 10px 16px;
+  padding: 6px 12px;
   text-align: left;
   background: transparent;
   border: none;
-  color: white;
-  font-size: 14px;
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 13px;
   cursor: pointer;
-  border-radius: 6px;
-  transition: all 0.15s ease;
+  border-radius: 5px;
+  transition: background-color 0.1s ease;
   font-weight: 400;
+  letter-spacing: -0.01em;
 }
 
 .context-menu button:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.18);
 }
 
-/* Grid Settings Modal */
+.context-menu button:active {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* App Context Menu - Individual app right-click menu */
+.app-context-menu {
+  position: fixed;
+  background: rgba(50, 50, 58, 0.85);
+  border-radius: 10px;
+  padding: 6px;
+  box-shadow:
+    0 0 0 0.5px rgba(255, 255, 255, 0.15),
+    0 10px 30px rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(60px) saturate(180%);
+  -webkit-backdrop-filter: blur(60px) saturate(180%);
+  z-index: 2000;
+  animation: contextMenuFadeIn 0.12s cubic-bezier(0.16, 1, 0.3, 1);
+  min-width: 200px;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+}
+
+.app-context-menu button {
+  display: block;
+  width: 100%;
+  padding: 6px 12px;
+  text-align: left;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.1s ease;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+.app-context-menu button:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.app-context-menu button:active {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Separator in context menus */
+.context-menu-separator {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 4px 0;
+}
+
+/* Danger action button (Move to Trash) */
+.context-menu-danger {
+  color: rgba(255, 69, 58, 0.95) !important;
+}
+
+.context-menu-danger:hover {
+  background: rgba(255, 69, 58, 0.15) !important;
+}
+
+.context-menu-danger:active {
+  background: rgba(255, 69, 58, 0.25) !important;
+}
+
+/* Grid Settings Modal - macOS Tahoe Style */
 .grid-settings-modal {
-  max-width: 500px;
-}
-
-.grid-settings-header {
-  margin: 0;
-  font-size: 24px;
-  font-weight: 600;
-  color: white;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
 }
 
 .grid-settings-content {
-  padding: 24px 0;
+  background: rgba(42, 42, 48, 0.92);
+  border-radius: 16px;
+  padding: 28px;
+  max-width: 480px;
+  width: 90%;
+  box-shadow:
+    0 0 0 0.5px rgba(255, 255, 255, 0.12),
+    0 20px 60px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(60px) saturate(180%);
+  -webkit-backdrop-filter: blur(60px) saturate(180%);
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
+}
+
+.grid-settings-header {
+  margin: 0 0 24px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+  letter-spacing: -0.02em;
 }
 
 .grid-setting-item {
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .grid-setting-label {
-  display: block;
-  margin-bottom: 12px;
-  font-size: 15px;
-  color: rgba(255, 255, 255, 0.95);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.85);
   font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.grid-setting-value {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 400;
+  font-feature-settings: "tnum";
 }
 
 .grid-setting-slider {
   width: 100%;
-  height: 6px;
-  border-radius: 3px;
-  background: rgba(255, 255, 255, 0.15);
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.12);
   outline: none;
   -webkit-appearance: none;
   appearance: none;
@@ -558,134 +725,208 @@ body {
 .grid-setting-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: white;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  transition: all 0.2s ease;
+  box-shadow:
+    0 0 0 0.5px rgba(0, 0, 0, 0.04),
+    0 1px 3px rgba(0, 0, 0, 0.15);
+  transition: all 0.15s ease;
 }
 
 .grid-setting-slider::-webkit-slider-thumb:hover {
-  transform: scale(1.2);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+  transform: scale(1.1);
+  box-shadow:
+    0 0 0 0.5px rgba(0, 0, 0, 0.04),
+    0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.grid-setting-slider::-webkit-slider-thumb:active {
+  transform: scale(1.05);
 }
 
 .grid-setting-slider::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: white;
   cursor: pointer;
   border: none;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  transition: all 0.2s ease;
+  box-shadow:
+    0 0 0 0.5px rgba(0, 0, 0, 0.04),
+    0 1px 3px rgba(0, 0, 0, 0.15);
+  transition: all 0.15s ease;
 }
 
 .grid-setting-slider::-moz-range-thumb:hover {
-  transform: scale(1.2);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+  transform: scale(1.1);
+  box-shadow:
+    0 0 0 0.5px rgba(0, 0, 0, 0.04),
+    0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .grid-setting-info {
   margin-bottom: 24px;
-  padding: 16px;
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .grid-setting-info p {
   margin: 0;
-  font-size: 15px;
-  color: rgba(255, 255, 255, 0.9);
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.grid-settings-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.grid-cancel-button,
+.grid-save-button {
+  flex: 1;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
   font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+  letter-spacing: -0.01em;
+}
+
+.grid-cancel-button {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.grid-cancel-button:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.grid-cancel-button:active {
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .grid-save-button {
-  width: 100%;
-  padding: 14px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border: none;
-  border-radius: 12px;
+  background: #007aff;
   color: white;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 
 .grid-save-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  background: #0051d5;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .grid-save-button:active {
-  transform: translateY(0);
+  background: #004fc7;
+  transform: scale(0.98);
 }
 
-/* Delete Confirmation Modal */
-.delete-confirmation-modal {
-  max-width: 450px;
-}
-
-.delete-confirmation-content {
-  padding: 20px 0;
-}
-
-.delete-confirmation-content p {
-  margin: 0 0 12px 0;
-  font-size: 16px;
-  color: rgba(255, 255, 255, 0.95);
-  text-align: center;
-}
-
-.delete-confirmation-note {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.7);
-  margin-bottom: 24px !important;
-}
-
-.delete-confirmation-buttons {
+/* Confirmation Modal - Unified style for TrashConfirmation and DeleteConfirmation */
+.confirmation-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   display: flex;
-  gap: 12px;
+  align-items: center;
   justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
 }
 
-.delete-confirmation-cancel,
-.delete-confirmation-confirm {
-  padding: 12px 24px;
+.confirmation-content {
+  background: rgba(42, 42, 48, 0.92);
+  border-radius: 16px;
+  padding: 28px;
+  max-width: 420px;
+  width: 90%;
+  box-shadow:
+    0 0 0 0.5px rgba(255, 255, 255, 0.12),
+    0 20px 60px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(60px) saturate(180%);
+  -webkit-backdrop-filter: blur(60px) saturate(180%);
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
+}
+
+.confirmation-title {
+  margin: 0 0 12px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+  letter-spacing: -0.02em;
+}
+
+.confirmation-message {
+  margin: 0 0 24px 0;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+}
+
+.confirmation-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.confirmation-cancel-button,
+.confirmation-danger-button {
+  flex: 1;
+  padding: 10px 20px;
   border: none;
   border-radius: 8px;
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
+  font-family: inherit;
+  letter-spacing: -0.01em;
 }
 
-.delete-confirmation-cancel {
-  background: rgba(255, 255, 255, 0.15);
+.confirmation-cancel-button {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.confirmation-cancel-button:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.confirmation-cancel-button:active {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.confirmation-danger-button {
+  background: #FF453A;
   color: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 
-.delete-confirmation-cancel:hover {
-  background: rgba(255, 255, 255, 0.25);
-  transform: translateY(-1px);
+.confirmation-danger-button:hover {
+  background: #FF3B30;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
-.delete-confirmation-confirm {
-  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
-  color: white;
-}
-
-.delete-confirmation-confirm:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
-}
-
-.delete-confirmation-cancel:active,
-.delete-confirmation-confirm:active {
-  transform: translateY(0);
+.confirmation-danger-button:active {
+  background: #FF3020;
+  transform: scale(0.98);
 }

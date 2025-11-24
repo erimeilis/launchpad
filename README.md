@@ -13,6 +13,8 @@
 - **🎨 Native macOS Vibrancy** - Beautiful glass effect with desktop wallpaper blur
 - **⌨️ Keyboard Shortcuts** - F4 to open, Esc to close, arrows for navigation
 - **🖱️ Drag & Drop** - Rearrange apps freely, drag between pages with edge detection
+- **🗑️ App Management** - Right-click apps to open, reveal in Finder, hide, or move to Trash
+- **✨ macOS Tahoe Design** - Unified confirmation dialogs with modern macOS styling
 - **💾 Persistent Layout** - Your app arrangement is saved automatically
 - **⚡ Lightweight** - Built with Tauri for native performance
 
@@ -80,11 +82,20 @@ npm run tauri build
 - **Esc** - Close Launchpad
 - **Enter** - Launch the first search result
 
+### App Management
+
+- **Right-Click App** - Context menu with options:
+  - Open - Launch the application
+  - Show in Finder - Reveal app in Finder
+  - Hide from Launchpad - Remove from view (doesn't uninstall)
+  - Move to Trash - Safely delete app (recoverable from Trash)
+
 ### Customization
 
-- **Right-Click** - Access grid settings and folder options
+- **Right-Click Background** - Access grid settings and folder options
 - **Grid Size** - Customize rows and columns for your screen
 - **Full-Width Mode** - Toggle between centered and full-width layouts
+- **Edit Mode** - Toggle jiggling animation for easy rearrangement
 
 ## 🏗️ Project Structure
 
@@ -135,4 +146,4 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 ---
 
-**Made with 💙💛 using Tauri**
+**Made with 💙💛 using Tauri and React**

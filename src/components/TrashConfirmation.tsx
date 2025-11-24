@@ -1,26 +1,27 @@
-import type { DeleteConfirmationState } from "../types";
-
-interface DeleteConfirmationProps {
-  confirmation: DeleteConfirmationState;
+interface TrashConfirmationProps {
+  appName: string;
   onConfirm: () => void;
   onCancel: () => void;
 }
 
 /**
- * Confirmation dialog for deleting folders
+ * Confirmation dialog for moving apps to Trash
+ * Prevents accidental deletion of applications
  */
-export function DeleteConfirmation({ confirmation, onConfirm, onCancel }: DeleteConfirmationProps) {
+export function TrashConfirmation({ appName, onConfirm, onCancel }: TrashConfirmationProps) {
   return (
     <div className="confirmation-modal" onClick={onCancel}>
       <div className="confirmation-content" onClick={(e) => e.stopPropagation()}>
-        <h2 className="confirmation-title">Delete folder "{confirmation.folderName}"?</h2>
-        <p className="confirmation-message">Apps will be moved back to the main grid.</p>
+        <h2 className="confirmation-title">Move "{appName}" to Trash?</h2>
+        <p className="confirmation-message">
+          This will move the application to Trash. You can recover it from Trash if needed.
+        </p>
         <div className="confirmation-buttons">
           <button className="confirmation-cancel-button" onClick={onCancel}>
             Cancel
           </button>
           <button className="confirmation-danger-button" onClick={onConfirm}>
-            Delete Folder
+            Move to Trash
           </button>
         </div>
       </div>

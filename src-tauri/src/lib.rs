@@ -1,15 +1,15 @@
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::Path;
-use walkdir::WalkDir;
 use tauri::Manager;
+use walkdir::WalkDir;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct App {
     name: String,
     bundle_id: String,
     path: String,
-    icon: Option<String>, // Base64 encoded icon
+    icon: Option<String>,          // Base64 encoded icon
     source_folder: Option<String>, // Track where the app came from
 }
 
@@ -17,20 +17,28 @@ struct App {
 fn get_installed_apps() -> Result<Vec<App>, String> {
     let mut apps = Vec::new();
 
-    // Scan /Applications folder
-    scan_applications_directory("/Applications", None, &mut apps);
+    // Scan /Applications folder (including subdirectories)
+    scan_applications_directory("/Applications", None, &mut apps, 2);
 
     // Scan /System/Applications folder
-    scan_applications_directory("/System/Applications", Some("System"), &mut apps);
+    scan_applications_directory("/System/Applications", Some("System"), &mut apps, 1);
+
+    // Scan /System/Applications/Utilities folder
+    scan_applications_directory(
+        "/System/Applications/Utilities",
+        Some("Utilities"),
+        &mut apps,
+        1,
+    );
 
     // Scan /Applications/Utilities folder
-    scan_applications_directory("/Applications/Utilities", Some("Utilities"), &mut apps);
+    scan_applications_directory("/Applications/Utilities", Some("Utilities"), &mut apps, 1);
 
     // Scan user Applications folder
     if let Some(home_dir) = std::env::var_os("HOME") {
         let user_apps_path = std::path::PathBuf::from(home_dir).join("Applications");
         if user_apps_path.exists() {
-            scan_applications_directory(user_apps_path.to_str().unwrap_or(""), None, &mut apps);
+            scan_applications_directory(user_apps_path.to_str().unwrap_or(""), None, &mut apps, 2);
         }
     }
 
@@ -44,9 +52,14 @@ fn get_installed_apps() -> Result<Vec<App>, String> {
     Ok(apps)
 }
 
-fn scan_applications_directory(path: &str, source_folder: Option<&str>, apps: &mut Vec<App>) {
+fn scan_applications_directory(
+    path: &str,
+    source_folder: Option<&str>,
+    apps: &mut Vec<App>,
+    max_depth: usize,
+) {
     for entry in WalkDir::new(path)
-        .max_depth(1)
+        .max_depth(max_depth)
         .into_iter()
         .filter_map(|e| e.ok())
     {
@@ -124,8 +137,8 @@ fn extract_app_icon(app_path: &Path, plist_dict: &plist::Dictionary) -> Option<S
 }
 
 fn extract_icns_as_base64(icon_path: &Path) -> Option<String> {
-    use std::process::Command;
     use std::env;
+    use std::process::Command;
 
     // Use macOS sips utility to convert ICNS to PNG
     let temp_dir = env::temp_dir();
@@ -172,11 +185,34 @@ fn launch_app(app_path: String) -> Result<(), String> {
     Ok(())
 }
 
+#[tauri::command]
+fn move_app_to_trash(app_path: String) -> Result<(), String> {
+    trash::delete(&app_path).map_err(|e| format!("Failed to move app to trash: {}", e))
+}
+
+#[tauri::command]
+fn reveal_in_finder(app_path: String) -> Result<(), String> {
+    use std::process::Command;
+
+    Command::new("open")
+        .arg("-R")
+        .arg(&app_path)
+        .spawn()
+        .map_err(|e| format!("Failed to reveal in Finder: {}", e))?;
+
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![get_installed_apps, launch_app])
+        .invoke_handler(tauri::generate_handler![
+            get_installed_apps,
+            launch_app,
+            move_app_to_trash,
+            reveal_in_finder
+        ])
         .setup(|app| {
             let window = app.get_webview_window("main").unwrap();
 

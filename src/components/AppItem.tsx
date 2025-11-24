@@ -4,7 +4,10 @@ interface AppItemProps {
   app: App;
   isDragging: boolean;
   isDragOver: boolean;
+  editMode: boolean;
   onLaunch: (appPath: string) => void;
+  onRemove?: (bundleId: string) => void;
+  onContextMenu?: (e: React.MouseEvent) => void;
   onMouseDown: (e: React.MouseEvent) => void;
   onMouseEnter: () => void;
   onMouseUp: () => void;
@@ -18,23 +21,39 @@ export function AppItem({
   app,
   isDragging,
   isDragOver,
+  editMode,
   onLaunch,
+  onRemove,
+  onContextMenu,
   onMouseDown,
   onMouseEnter,
   onMouseUp,
 }: AppItemProps) {
   return (
     <div
-      className={`app-item ${isDragging ? "dragging" : ""} ${isDragOver ? "drag-over" : ""}`}
+      className={`app-item ${isDragging ? "dragging" : ""} ${isDragOver ? "drag-over" : ""} ${editMode ? "jiggle" : ""}`}
       onClick={() => {
-        if (!isDragging) onLaunch(app.path);
+        if (!isDragging && !editMode) onLaunch(app.path);
       }}
+      onContextMenu={onContextMenu}
       onMouseDown={onMouseDown}
       onMouseEnter={onMouseEnter}
       onMouseUp={onMouseUp}
       title={app.name}
       draggable="false"
     >
+      {editMode && onRemove && (
+        <button
+          className="app-remove-button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove(app.bundle_id);
+          }}
+          aria-label={`Remove ${app.name}`}
+        >
+          ×
+        </button>
+      )}
       <div className="app-icon">
         {app.icon ? (
           <img src={app.icon} alt={app.name} />
