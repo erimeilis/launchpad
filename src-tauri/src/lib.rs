@@ -1,8 +1,14 @@
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::Path;
-use tauri::Manager;
+use std::sync::OnceLock;
+use tauri::{Emitter, Manager};
 use walkdir::WalkDir;
+
+mod hot_corners;
+use hot_corners::{Corner, HotCornerConfig, HotCornerMonitor};
+
+static HOT_CORNER_MONITOR: OnceLock<HotCornerMonitor> = OnceLock::new();
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct App {
@@ -204,6 +210,46 @@ fn reveal_in_finder(app_path: String) -> Result<(), String> {
 }
 
 #[tauri::command]
+fn enable_hot_corner(
+    corner: String,
+    threshold: f64,
+    debounce_ms: u64,
+) -> Result<(), String> {
+    let corner_enum = match corner.as_str() {
+        "top-left" => Corner::TopLeft,
+        "top-right" => Corner::TopRight,
+        "bottom-left" => Corner::BottomLeft,
+        "bottom-right" => Corner::BottomRight,
+        "disabled" => Corner::Disabled,
+        _ => return Err("Invalid corner".to_string()),
+    };
+
+    let config = HotCornerConfig {
+        enabled: corner_enum != Corner::Disabled,
+        corner: corner_enum,
+        trigger_threshold: threshold,
+        debounce_ms,
+    };
+
+    if let Some(monitor) = HOT_CORNER_MONITOR.get() {
+        monitor.update_config(config);
+        // Start the listener thread if not already started
+        // (idempotent - will only start once)
+        monitor.start();
+    }
+
+    Ok(())
+}
+
+#[tauri::command]
+fn disable_hot_corner() -> Result<(), String> {
+    if let Some(monitor) = HOT_CORNER_MONITOR.get() {
+        monitor.set_enabled(false);
+    }
+    Ok(())
+}
+
+#[tauri::command]
 async fn position_on_cursor_monitor(app: tauri::AppHandle) -> Result<(), String> {
     use tauri::LogicalPosition;
 
@@ -272,7 +318,9 @@ pub fn run() {
             launch_app,
             move_app_to_trash,
             reveal_in_finder,
-            position_on_cursor_monitor
+            position_on_cursor_monitor,
+            enable_hot_corner,
+            disable_hot_corner
         ])
         .setup(|app| {
             let window = app.get_webview_window("main").unwrap();
@@ -285,6 +333,17 @@ pub fn run() {
                 apply_vibrancy(&window, NSVisualEffectMaterial::HudWindow, Some(NSVisualEffectState::Active), None)
                     .expect("Unsupported platform! 'apply_vibrancy' is only supported on macOS");
             }
+
+            // Initialize hot corner monitor (but don't start listener yet)
+            let app_handle = app.handle().clone();
+            let monitor = HotCornerMonitor::new(
+                HotCornerConfig::default(),
+                move |corner| {
+                    let _ = app_handle.emit("hot-corner-triggered", corner);
+                },
+            );
+            // DON'T start the monitor here - it will be started when user enables it in settings
+            let _ = HOT_CORNER_MONITOR.set(monitor);
 
             Ok(())
         })

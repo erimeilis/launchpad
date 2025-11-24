@@ -81,7 +81,23 @@ function App() {
   // Grid settings
   const [gridSettings, setGridSettings] = useState<GridSettingsType>(() => {
     const saved = localStorage.getItem("launchpad-grid-settings");
-    return saved ? JSON.parse(saved) : { rows: 7, cols: 10, fullWidth: false };
+    const defaults = {
+      rows: 7,
+      cols: 10,
+      fullWidth: false,
+      hotCornerEnabled: false,
+      hotCorner: "top-left",
+      hotCornerThreshold: 10,
+      hotCornerDebounce: 300,
+    };
+
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Merge with defaults to ensure all properties exist
+      return { ...defaults, ...parsed };
+    }
+
+    return defaults;
   });
 
   const APPS_PER_PAGE = gridSettings.rows * gridSettings.cols;
@@ -198,7 +214,8 @@ function App() {
       const newItems = mergeAppsAndFolders(apps, updatedFolders);
       setItems(newItems);
     }
-  }, [apps, folders, createSystemFolders, mergeAppsAndFolders, saveFolders, setItems]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [apps, folders]);
 
   // Reset to first page when searching
   useEffect(() => {
@@ -298,6 +315,36 @@ function App() {
     };
   }, []);
 
+  // Listen for hot corner trigger events
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+
+    async function setupHotCornerListener() {
+      const { getCurrentWindow } = await import("@tauri-apps/api/window");
+      const { listen } = await import("@tauri-apps/api/event");
+
+      unlisten = await listen("hot-corner-triggered", async () => {
+        const appWindow = getCurrentWindow();
+        const { invoke } = await import("@tauri-apps/api/core");
+
+        try {
+          // Position window on cursor's monitor and show
+          await invoke("position_on_cursor_monitor");
+        } catch (err) {
+          console.error("Failed to show window from hot corner:", err);
+          // Fallback: just show the window
+          await appWindow.show();
+        }
+      });
+    }
+
+    setupHotCornerListener();
+
+    return () => {
+      if (unlisten) unlisten();
+    };
+  }, []);
+
   // Context menu handler
   function handleContextMenu(e: React.MouseEvent) {
     e.preventDefault();
@@ -311,8 +358,25 @@ function App() {
   }
 
   // Save grid settings
-  function saveGridSettings() {
+  async function saveGridSettings() {
     localStorage.setItem("launchpad-grid-settings", JSON.stringify(gridSettings));
+
+    // Apply hot corner settings
+    const { invoke } = await import("@tauri-apps/api/core");
+    try {
+      if (gridSettings.hotCornerEnabled) {
+        await invoke("enable_hot_corner", {
+          corner: gridSettings.hotCorner,
+          threshold: gridSettings.hotCornerThreshold,
+          debounceMs: gridSettings.hotCornerDebounce,
+        });
+      } else {
+        await invoke("disable_hot_corner");
+      }
+    } catch (err) {
+      console.error("Failed to update hot corner settings:", err);
+    }
+
     setShowGridSettings(false);
   }
 

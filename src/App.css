@@ -783,6 +783,51 @@ body {
   line-height: 1.5;
 }
 
+.grid-settings-separator {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 24px 0;
+}
+
+.grid-settings-section-header {
+  margin: 0 0 20px 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: -0.01em;
+}
+
+.grid-setting-select {
+  width: 100%;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 13px;
+  font-weight: 400;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.grid-setting-select:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.grid-setting-select:focus {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(0, 122, 255, 0.6);
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15);
+}
+
+.grid-setting-select option {
+  background: rgb(42, 42, 48);
+  color: rgba(255, 255, 255, 0.9);
+}
+
 .grid-settings-buttons {
   display: flex;
   gap: 10px;

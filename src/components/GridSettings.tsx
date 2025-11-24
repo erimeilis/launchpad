@@ -65,6 +65,76 @@ export function GridSettings({ settings, onSettingsChange, onSave, onClose }: Gr
           <p>Apps per page: {settings.rows * settings.cols}</p>
         </div>
 
+        <div className="grid-settings-separator" />
+
+        <h3 className="grid-settings-section-header">Hot Corners</h3>
+
+        <div className="grid-setting-item">
+          <label
+            className="grid-setting-label"
+            style={{ display: "flex", alignItems: "center", cursor: "pointer" }}
+          >
+            <input
+              type="checkbox"
+              checked={settings.hotCornerEnabled}
+              onChange={(e) => onSettingsChange({ ...settings, hotCornerEnabled: e.target.checked })}
+              style={{ marginRight: "10px", width: "16px", height: "16px", cursor: "pointer" }}
+            />
+            <span>Enable hot corner</span>
+          </label>
+        </div>
+
+        {settings.hotCornerEnabled && (
+          <>
+            <div className="grid-setting-item">
+              <label className="grid-setting-label">
+                <span>Corner position</span>
+              </label>
+              <select
+                className="grid-setting-select"
+                value={settings.hotCorner}
+                onChange={(e) => onSettingsChange({ ...settings, hotCorner: e.target.value })}
+              >
+                <option value="top-left">Top Left</option>
+                <option value="top-right">Top Right</option>
+                <option value="bottom-left">Bottom Left</option>
+                <option value="bottom-right">Bottom Right</option>
+              </select>
+            </div>
+
+            <div className="grid-setting-item">
+              <label className="grid-setting-label">
+                <span>Trigger threshold (pixels)</span>
+                <span className="grid-setting-value">{settings.hotCornerThreshold}</span>
+              </label>
+              <input
+                type="range"
+                className="grid-setting-slider"
+                min="5"
+                max="50"
+                value={settings.hotCornerThreshold}
+                onChange={(e) => onSettingsChange({ ...settings, hotCornerThreshold: parseInt(e.target.value) })}
+              />
+            </div>
+
+            <div className="grid-setting-item">
+              <label className="grid-setting-label">
+                <span>Debounce delay (ms)</span>
+                <span className="grid-setting-value">{settings.hotCornerDebounce}</span>
+              </label>
+              <input
+                type="range"
+                className="grid-setting-slider"
+                min="100"
+                max="1000"
+                step="100"
+                value={settings.hotCornerDebounce}
+                onChange={(e) => onSettingsChange({ ...settings, hotCornerDebounce: parseInt(e.target.value) })}
+              />
+            </div>
+          </>
+        )}
+
         <div className="grid-settings-buttons">
           <button className="grid-cancel-button" onClick={onClose}>
             Cancel

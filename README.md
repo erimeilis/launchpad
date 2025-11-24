@@ -14,6 +14,8 @@
 - **⌨️ Keyboard Shortcuts** - F4 to open, Esc to close, arrows for navigation
 - **🖱️ Drag & Drop** - Rearrange apps freely, drag between pages with edge detection
 - **🗑️ App Management** - Right-click apps to open, reveal in Finder, hide, or move to Trash
+- **🖼️ Multi-Monitor Support** - Smart window positioning on the monitor with cursor focus
+- **🔲 Hot Corners** - Trigger Launchpad by moving mouse to screen corners (configurable)
 - **✨ macOS Tahoe Design** - Unified confirmation dialogs with modern macOS styling
 - **💾 Persistent Layout** - Your app arrangement is saved automatically
 - **⚡ Lightweight** - Built with Tauri for native performance
@@ -66,6 +68,7 @@ npm run tauri build
 
 - Press **F4** (default)
 - Click the Launchpad icon in Applications
+- **Hot Corners** - Move mouse to configured corner (Settings → Hot Corner)
 - _Note: Trackpad gestures coming soon_
 
 ### Organizing Apps
@@ -95,6 +98,10 @@ npm run tauri build
 - **Right-Click Background** - Access grid settings and folder options
 - **Grid Size** - Customize rows and columns for your screen
 - **Full-Width Mode** - Toggle between centered and full-width layouts
+- **Hot Corner Settings** - Configure which corner triggers Launchpad
+  - Choose corner: Top-left, Top-right, Bottom-left, Bottom-right
+  - Adjust trigger threshold (5-50 pixels)
+  - Set debounce delay (100-1000ms)
 - **Edit Mode** - Toggle jiggling animation for easy rearrangement
 
 ## 🏗️ Project Structure
@@ -135,11 +142,18 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 - **Apple** - For the original Launchpad design inspiration
 - **Community** - All users who missed the classic Launchpad experience
 
-## 🐛 Known Issues & Roadmap
+## 🚀 Roadmap
 
-- [ ] Trackpad gesture support (pinch to open/close)
-- [ ] Hot corners activation
-- [ ] Global keyboard shortcut customization
+**Completed:**
+- [x] Multi-monitor support
+- [x] Per-monitor focus detection
+- [x] Single instance enforcement
+- [x] App context menu (reveal in Finder, move to Trash, hide)
+- [x] Hot corners activation (configurable corner, threshold, debounce)
+
+**Planned:**
+- [ ] Global keyboard shortcut customization (F4 + custom)
+- [ ] Trackpad gestures (pinch to open/close)
 - [ ] iCloud sync for app layouts
 - [ ] Auto-categorization option (optional)
 - [ ] Multiple layout profiles

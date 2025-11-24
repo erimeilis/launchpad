@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "tauri": "tauri",
+    "clean": "killall launchpad 2>/dev/null || true; lsof -ti:1420 | xargs kill -9 2>/dev/null || true",
+    "tauri": "npm run clean && tauri",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\""
   },

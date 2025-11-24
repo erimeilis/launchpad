@@ -34,6 +34,10 @@ export interface GridSettings {
   rows: number;
   cols: number;
   fullWidth: boolean;
+  hotCornerEnabled: boolean;
+  hotCorner: string;
+  hotCornerThreshold: number;
+  hotCornerDebounce: number;
 }
 
 /**

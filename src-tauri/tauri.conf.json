@@ -11,6 +11,7 @@
   },
   "app": {
     "macOSPrivateApi": true,
+    "withGlobalTauri": true,
     "windows": [
       {
         "title": "Launchpad",
@@ -24,7 +25,8 @@
         "resizable": false,
         "skipTaskbar": false,
         "hiddenTitle": true,
-        "visible": false
+        "visible": false,
+        "devtools": true
       }
     ],
     "security": {

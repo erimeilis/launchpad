@@ -29,4 +29,6 @@ image = "0.25"
 base64 = "0.22"
 window-vibrancy = "0.7.1"
 trash = "5"
+cocoa = "0.25"
+core-graphics = "0.23"
 
