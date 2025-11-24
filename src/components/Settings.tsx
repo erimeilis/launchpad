@@ -1,6 +1,10 @@
+import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
+import { invoke } from "@tauri-apps/api/core";
+import { changeLanguage } from "../i18n";
 import type { GridSettings as GridSettingsType } from "../types";
 
-interface GridSettingsProps {
+interface SettingsProps {
   settings: GridSettingsType;
   onSettingsChange: (settings: GridSettingsType) => void;
   onSave: () => void;
@@ -8,17 +12,60 @@ interface GridSettingsProps {
 }
 
 /**
- * Modal for configuring grid dimensions and layout
+ * Modal for configuring Launchpad settings
  */
-export function GridSettings({ settings, onSettingsChange, onSave, onClose }: GridSettingsProps) {
+export function Settings({ settings, onSettingsChange, onSave, onClose }: SettingsProps) {
+  const { t, i18n } = useTranslation();
+
+  // Fetch and apply system accent color
+  useEffect(() => {
+    invoke<string>("get_system_accent_color")
+      .then((color) => {
+        document.documentElement.style.setProperty("--system-accent-color", color);
+      })
+      .catch((error) => {
+        console.error("Failed to get system accent color:", error);
+        // Fallback to blue
+        document.documentElement.style.setProperty("--system-accent-color", "#007aff");
+      });
+  }, []);
+
   return (
     <div className="grid-settings-modal" onClick={onClose}>
       <div className="grid-settings-content" onClick={(e) => e.stopPropagation()}>
-        <h2 className="grid-settings-header">Grid Settings</h2>
+        <h2 className="grid-settings-header">{t("settings.title")}</h2>
+
+        {/* Language Section */}
+        <h3 className="grid-settings-section-header">{t("settings.language.title")}</h3>
 
         <div className="grid-setting-item">
           <label className="grid-setting-label">
-            <span>Rows per page</span>
+            <span>{t("settings.language.label")}</span>
+          </label>
+          <select
+            className="grid-setting-select"
+            value={i18n.language}
+            onChange={(e) => changeLanguage(e.target.value)}
+          >
+            <option value="en">{t("settings.language.languages.en")}</option>
+            <option value="es">{t("settings.language.languages.es")}</option>
+            <option value="fr">{t("settings.language.languages.fr")}</option>
+            <option value="de">{t("settings.language.languages.de")}</option>
+            <option value="zh">{t("settings.language.languages.zh")}</option>
+            <option value="ja">{t("settings.language.languages.ja")}</option>
+            <option value="uk">{t("settings.language.languages.uk")}</option>
+            <option value="pl">{t("settings.language.languages.pl")}</option>
+          </select>
+        </div>
+
+        <div className="grid-settings-separator" />
+
+        {/* Grid Layout Section */}
+        <h3 className="grid-settings-section-header">{t("settings.gridLayout.title")}</h3>
+
+        <div className="grid-setting-item">
+          <label className="grid-setting-label">
+            <span>{t("settings.gridLayout.rowsPerPage")}</span>
             <span className="grid-setting-value">{settings.rows}</span>
           </label>
           <input
@@ -33,7 +80,7 @@ export function GridSettings({ settings, onSettingsChange, onSave, onClose }: Gr
 
         <div className="grid-setting-item">
           <label className="grid-setting-label">
-            <span>Columns per page</span>
+            <span>{t("settings.gridLayout.columnsPerPage")}</span>
             <span className="grid-setting-value">{settings.cols}</span>
           </label>
           <input
@@ -57,17 +104,18 @@ export function GridSettings({ settings, onSettingsChange, onSave, onClose }: Gr
               onChange={(e) => onSettingsChange({ ...settings, fullWidth: e.target.checked })}
               style={{ marginRight: "10px", width: "16px", height: "16px", cursor: "pointer" }}
             />
-            <span>Use full screen width</span>
+            <span>{t("settings.gridLayout.useFullWidth")}</span>
           </label>
         </div>
 
         <div className="grid-setting-info">
-          <p>Apps per page: {settings.rows * settings.cols}</p>
+          <p>{t("common.appsPerPage", { count: settings.rows * settings.cols })}</p>
         </div>
 
         <div className="grid-settings-separator" />
 
-        <h3 className="grid-settings-section-header">Hot Corners</h3>
+        {/* Hot Corners Section */}
+        <h3 className="grid-settings-section-header">{t("settings.hotCorners.title")}</h3>
 
         <div className="grid-setting-item">
           <label
@@ -80,7 +128,7 @@ export function GridSettings({ settings, onSettingsChange, onSave, onClose }: Gr
               onChange={(e) => onSettingsChange({ ...settings, hotCornerEnabled: e.target.checked })}
               style={{ marginRight: "10px", width: "16px", height: "16px", cursor: "pointer" }}
             />
-            <span>Enable hot corner</span>
+            <span>{t("settings.hotCorners.enable")}</span>
           </label>
         </div>
 
@@ -88,23 +136,23 @@ export function GridSettings({ settings, onSettingsChange, onSave, onClose }: Gr
           <>
             <div className="grid-setting-item">
               <label className="grid-setting-label">
-                <span>Corner position</span>
+                <span>{t("settings.hotCorners.cornerPosition")}</span>
               </label>
               <select
                 className="grid-setting-select"
                 value={settings.hotCorner}
                 onChange={(e) => onSettingsChange({ ...settings, hotCorner: e.target.value })}
               >
-                <option value="top-left">Top Left</option>
-                <option value="top-right">Top Right</option>
-                <option value="bottom-left">Bottom Left</option>
-                <option value="bottom-right">Bottom Right</option>
+                <option value="top-left">{t("settings.hotCorners.topLeft")}</option>
+                <option value="top-right">{t("settings.hotCorners.topRight")}</option>
+                <option value="bottom-left">{t("settings.hotCorners.bottomLeft")}</option>
+                <option value="bottom-right">{t("settings.hotCorners.bottomRight")}</option>
               </select>
             </div>
 
             <div className="grid-setting-item">
               <label className="grid-setting-label">
-                <span>Trigger threshold (pixels)</span>
+                <span>{t("settings.hotCorners.triggerThreshold")}</span>
                 <span className="grid-setting-value">{settings.hotCornerThreshold}</span>
               </label>
               <input
@@ -119,7 +167,7 @@ export function GridSettings({ settings, onSettingsChange, onSave, onClose }: Gr
 
             <div className="grid-setting-item">
               <label className="grid-setting-label">
-                <span>Debounce delay (ms)</span>
+                <span>{t("settings.hotCorners.debounceDelay")}</span>
                 <span className="grid-setting-value">{settings.hotCornerDebounce}</span>
               </label>
               <input
@@ -137,11 +185,12 @@ export function GridSettings({ settings, onSettingsChange, onSave, onClose }: Gr
 
         <div className="grid-settings-separator" />
 
-        <h3 className="grid-settings-section-header">Global Shortcut</h3>
+        {/* Keyboard Shortcuts Section */}
+        <h3 className="grid-settings-section-header">{t("settings.keyboardShortcuts.title")}</h3>
 
         <div className="grid-setting-item">
           <label className="grid-setting-label">
-            <span>Keyboard shortcut to open Launchpad</span>
+            <span>{t("settings.keyboardShortcuts.openLaunchpad")}</span>
           </label>
           <input
             type="text"
@@ -161,17 +210,17 @@ export function GridSettings({ settings, onSettingsChange, onSave, onClose }: Gr
             }}
           />
           <div className="grid-setting-info" style={{ marginTop: "8px", fontSize: "12px" }}>
-            <p>Examples: F4, CommandOrControl+Space, Alt+L</p>
-            <p>Modifiers: Cmd/CommandOrControl, Alt/Option, Shift, Ctrl</p>
+            <p>{t("settings.keyboardShortcuts.examplesLabel")}</p>
+            <p>{t("settings.keyboardShortcuts.modifiersLabel")}</p>
           </div>
         </div>
 
         <div className="grid-settings-buttons">
           <button className="grid-cancel-button" onClick={onClose}>
-            Cancel
+            {t("common.cancel")}
           </button>
           <button className="grid-save-button" onClick={onSave}>
-            Save
+            {t("common.save")}
           </button>
         </div>
       </div>

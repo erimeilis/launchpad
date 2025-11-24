@@ -101,9 +101,31 @@ export function useDragAndDrop({
       const insertPos = Math.min(draggedIndex, globalTargetIndex);
       newItems.splice(insertPos, 0, newFolder);
 
+      // Calculate the page where the folder will appear
+      const folderPage = Math.floor(insertPos / appsPerPage);
+
+      console.log('Folder creation:', {
+        draggedIndex,
+        globalTargetIndex,
+        insertPos,
+        appsPerPage,
+        folderPage,
+        currentPage,
+        totalItems: newItems.length
+      });
+
+      // Update items first, then navigate after a brief delay to ensure React has updated
       setItems(newItems);
       saveFolders([...folders, newFolder]);
       saveItemOrder(newItems);
+
+      // Navigate to the folder's page after state updates
+      if (folderPage !== currentPage) {
+        setTimeout(() => {
+          console.log('Navigating to page:', folderPage);
+          setCurrentPage(folderPage);
+        }, 50);
+      }
       setDraggedIndex(null);
       setDraggedItem(null);
       return;

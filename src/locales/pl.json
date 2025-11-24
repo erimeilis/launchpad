@@ -1,0 +1,79 @@
+{
+  "common": {
+    "save": "Zapisz",
+    "cancel": "Anuluj",
+    "loading": "Ładowanie aplikacji...",
+    "retry": "Ponów",
+    "appsPerPage": "Aplikacji na stronę: {{count}}"
+  },
+  "search": {
+    "placeholder": "Szukaj aplikacji",
+    "noResults": "Nie znaleziono aplikacji dla \"{{query}}\""
+  },
+  "contextMenu": {
+    "createFolder": "Utwórz Folder",
+    "sortAlphabetically": "Sortuj Alfabetycznie",
+    "editApps": "Edytuj Aplikacje",
+    "doneEditing": "Zakończ Edycję",
+    "settings": "Ustawienia"
+  },
+  "appContextMenu": {
+    "open": "Otwórz",
+    "revealInFinder": "Pokaż w Finderze",
+    "moveToTrash": "Przenieś do Kosza",
+    "hideFromLaunchpad": "Ukryj w Launchpadzie"
+  },
+  "settings": {
+    "title": "Ustawienia",
+    "language": {
+      "title": "Język",
+      "label": "Język Aplikacji",
+      "languages": {
+        "en": "English",
+        "es": "Español",
+        "fr": "Français",
+        "de": "Deutsch",
+        "zh": "中文",
+        "ja": "日本語",
+        "uk": "Українська",
+        "pl": "Polski"
+      }
+    },
+    "gridLayout": {
+      "title": "Układ Siatki",
+      "rowsPerPage": "Wierszy na stronę",
+      "columnsPerPage": "Kolumn na stronę",
+      "useFullWidth": "Użyj pełnej szerokości ekranu"
+    },
+    "hotCorners": {
+      "title": "Aktywne Rogi",
+      "enable": "Włącz aktywny róg",
+      "cornerPosition": "Pozycja rogu",
+      "topLeft": "Lewy Górny",
+      "topRight": "Prawy Górny",
+      "bottomLeft": "Lewy Dolny",
+      "bottomRight": "Prawy Dolny",
+      "triggerThreshold": "Próg wyzwalania (piksele)",
+      "debounceDelay": "Opóźnienie debouncingu (ms)"
+    },
+    "keyboardShortcuts": {
+      "title": "Skróty Klawiszowe",
+      "openLaunchpad": "Otwórz Launchpad",
+      "examplesLabel": "Przykłady: F4, CommandOrControl+Spacja, Alt+L",
+      "modifiersLabel": "Modyfikatory: Cmd/CommandOrControl, Alt/Option, Shift, Ctrl"
+    }
+  },
+  "folder": {
+    "defaultName": "Folder",
+    "newFolderName": "Nowy Folder",
+    "delete": "Usuń Folder",
+    "deleteConfirm": "Usunąć folder \"{{name}}\"?",
+    "deleteMessage": "Aplikacje w środku zostaną przeniesione do głównej siatki."
+  },
+  "trash": {
+    "title": "Przenieść do Kosza?",
+    "message": "Czy na pewno chcesz przenieść \"{{appName}}\" do Kosza?",
+    "confirm": "Przenieś do Kosza",
+    "cancel": "Anuluj"
+  }
+}

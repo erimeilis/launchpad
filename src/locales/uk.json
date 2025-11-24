@@ -1,0 +1,79 @@
+{
+  "common": {
+    "save": "Зберегти",
+    "cancel": "Скасувати",
+    "loading": "Завантаження програм...",
+    "retry": "Повторити",
+    "appsPerPage": "Програм на сторінці: {{count}}"
+  },
+  "search": {
+    "placeholder": "Пошук програм",
+    "noResults": "Програм для \"{{query}}\" не знайдено"
+  },
+  "contextMenu": {
+    "createFolder": "Створити Папку",
+    "sortAlphabetically": "Сортувати за Алфавітом",
+    "editApps": "Редагувати Програми",
+    "doneEditing": "Завершити Редагування",
+    "settings": "Налаштування"
+  },
+  "appContextMenu": {
+    "open": "Відкрити",
+    "revealInFinder": "Показати у Finder",
+    "moveToTrash": "Перемістити в Корзину",
+    "hideFromLaunchpad": "Сховати з Launchpad"
+  },
+  "settings": {
+    "title": "Налаштування",
+    "language": {
+      "title": "Мова",
+      "label": "Мова Програми",
+      "languages": {
+        "en": "English",
+        "es": "Español",
+        "fr": "Français",
+        "de": "Deutsch",
+        "zh": "中文",
+        "ja": "日本語",
+        "uk": "Українська",
+        "pl": "Polski"
+      }
+    },
+    "gridLayout": {
+      "title": "Макет Сітки",
+      "rowsPerPage": "Рядків на сторінці",
+      "columnsPerPage": "Стовпців на сторінці",
+      "useFullWidth": "Використовувати повну ширину екрана"
+    },
+    "hotCorners": {
+      "title": "Активні Кути",
+      "enable": "Увімкнути активний кут",
+      "cornerPosition": "Позиція кута",
+      "topLeft": "Вгорі Ліворуч",
+      "topRight": "Вгорі Праворуч",
+      "bottomLeft": "Внизу Ліворуч",
+      "bottomRight": "Внизу Праворуч",
+      "triggerThreshold": "Поріг спрацювання (пікселі)",
+      "debounceDelay": "Затримка антидзвону (мс)"
+    },
+    "keyboardShortcuts": {
+      "title": "Клавіатурні Скорочення",
+      "openLaunchpad": "Відкрити Launchpad",
+      "examplesLabel": "Приклади: F4, CommandOrControl+Пробіл, Alt+L",
+      "modifiersLabel": "Модифікатори: Cmd/CommandOrControl, Alt/Option, Shift, Ctrl"
+    }
+  },
+  "folder": {
+    "defaultName": "Папка",
+    "newFolderName": "Нова Папка",
+    "delete": "Видалити Папку",
+    "deleteConfirm": "Видалити папку \"{{name}}\"?",
+    "deleteMessage": "Програми всередині будуть переміщені до основної сітки."
+  },
+  "trash": {
+    "title": "Перемістити в Корзину?",
+    "message": "Ви впевнені, що хочете перемістити \"{{appName}}\" в Корзину?",
+    "confirm": "Перемістити в Корзину",
+    "cancel": "Скасувати"
+  }
+}

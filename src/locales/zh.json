@@ -1,0 +1,79 @@
+{
+  "common": {
+    "save": "保存",
+    "cancel": "取消",
+    "loading": "正在加载应用程序...",
+    "retry": "重试",
+    "appsPerPage": "每页应用数：{{count}}"
+  },
+  "search": {
+    "placeholder": "搜索应用",
+    "noResults": "未找到与\"{{query}}\"相关的应用"
+  },
+  "contextMenu": {
+    "createFolder": "创建文件夹",
+    "sortAlphabetically": "按字母顺序排序",
+    "editApps": "编辑应用",
+    "doneEditing": "完成编辑",
+    "settings": "设置"
+  },
+  "appContextMenu": {
+    "open": "打开",
+    "revealInFinder": "在访达中显示",
+    "moveToTrash": "移到废纸篓",
+    "hideFromLaunchpad": "从启动台中隐藏"
+  },
+  "settings": {
+    "title": "设置",
+    "language": {
+      "title": "语言",
+      "label": "应用语言",
+      "languages": {
+        "en": "English",
+        "es": "Español",
+        "fr": "Français",
+        "de": "Deutsch",
+        "zh": "中文",
+        "ja": "日本語",
+        "uk": "Українська",
+        "pl": "Polski"
+      }
+    },
+    "gridLayout": {
+      "title": "网格布局",
+      "rowsPerPage": "每页行数",
+      "columnsPerPage": "每页列数",
+      "useFullWidth": "使用全屏宽度"
+    },
+    "hotCorners": {
+      "title": "触发角",
+      "enable": "启用触发角",
+      "cornerPosition": "角位置",
+      "topLeft": "左上角",
+      "topRight": "右上角",
+      "bottomLeft": "左下角",
+      "bottomRight": "右下角",
+      "triggerThreshold": "触发阈值（像素）",
+      "debounceDelay": "防抖延迟（毫秒）"
+    },
+    "keyboardShortcuts": {
+      "title": "键盘快捷键",
+      "openLaunchpad": "打开启动台",
+      "examplesLabel": "示例：F4、CommandOrControl+空格、Alt+L",
+      "modifiersLabel": "修饰键：Cmd/CommandOrControl、Alt/Option、Shift、Ctrl"
+    }
+  },
+  "folder": {
+    "defaultName": "文件夹",
+    "newFolderName": "新建文件夹",
+    "delete": "删除文件夹",
+    "deleteConfirm": "删除文件夹\"{{name}}\"？",
+    "deleteMessage": "文件夹内的应用将移至主网格。"
+  },
+  "trash": {
+    "title": "移到废纸篓？",
+    "message": "您确定要将\"{{appName}}\"移到废纸篓吗？",
+    "confirm": "移到废纸篓",
+    "cancel": "取消"
+  }
+}

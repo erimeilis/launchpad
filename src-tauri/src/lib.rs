@@ -250,6 +250,45 @@ fn disable_hot_corner() -> Result<(), String> {
 }
 
 #[tauri::command]
+#[allow(unexpected_cfgs)] // Suppress warnings from objc crate macros (msg_send!, class!)
+fn get_system_accent_color() -> Result<String, String> {
+    #[cfg(target_os = "macos")]
+    {
+        use cocoa::appkit::NSColorSpace;
+        use cocoa::base::id;
+        use objc::{class, msg_send, sel, sel_impl};
+
+        unsafe {
+            let color: id = msg_send![class!(NSColor), controlAccentColor];
+            let rgb_colorspace = NSColorSpace::genericRGBColorSpace(cocoa::base::nil);
+            let rgb_color: id = msg_send![color, colorUsingColorSpace: rgb_colorspace];
+
+            if rgb_color.is_null() {
+                return Err("Failed to convert accent color to RGB".to_string());
+            }
+
+            let r: f64 = msg_send![rgb_color, redComponent];
+            let g: f64 = msg_send![rgb_color, greenComponent];
+            let b: f64 = msg_send![rgb_color, blueComponent];
+
+            let hex = format!(
+                "#{:02x}{:02x}{:02x}",
+                (r * 255.0) as u8,
+                (g * 255.0) as u8,
+                (b * 255.0) as u8
+            );
+
+            Ok(hex)
+        }
+    }
+
+    #[cfg(not(target_os = "macos"))]
+    {
+        Ok("#007aff".to_string())
+    }
+}
+
+#[tauri::command]
 async fn position_on_cursor_monitor(app: tauri::AppHandle) -> Result<(), String> {
     use tauri::LogicalPosition;
 
@@ -326,7 +365,7 @@ fn register_global_shortcut(app: tauri::AppHandle, shortcut: String) -> Result<(
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    use tauri_plugin_global_shortcut::{Builder as ShortcutBuilder, GlobalShortcutExt};
+    use tauri_plugin_global_shortcut::Builder as ShortcutBuilder;
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
@@ -347,7 +386,8 @@ pub fn run() {
             position_on_cursor_monitor,
             enable_hot_corner,
             disable_hot_corner,
-            register_global_shortcut
+            register_global_shortcut,
+            get_system_accent_color
         ])
         .setup(|app| {
             let window = app.get_webview_window("main").unwrap();

@@ -9,6 +9,98 @@
     -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Light theme colors */
+  --text-primary: rgba(0, 0, 0, 0.95);
+  --text-secondary: rgba(0, 0, 0, 0.75);
+  --text-tertiary: rgba(0, 0, 0, 0.6);
+  --text-quaternary: rgba(0, 0, 0, 0.5);
+
+  --bg-modal: rgba(248, 248, 248, 0.92);
+  --bg-modal-backdrop: rgba(255, 255, 255, 0.5);
+  --bg-secondary: rgba(235, 235, 235, 0.85);
+  --bg-tertiary: rgba(0, 0, 0, 0.05);
+  --bg-quaternary: rgba(0, 0, 0, 0.08);
+
+  --border-primary: rgba(0, 0, 0, 0.12);
+  --border-secondary: rgba(0, 0, 0, 0.1);
+  --border-modal: rgba(0, 0, 0, 0.15);
+
+  --input-bg: rgba(0, 0, 0, 0.06);
+  --input-bg-hover: rgba(0, 0, 0, 0.1);
+  --input-bg-focus: rgba(0, 0, 0, 0.08);
+  --input-border: rgba(0, 0, 0, 0.15);
+  --input-border-hover: rgba(0, 0, 0, 0.25);
+
+  --menu-bg: rgba(252, 252, 252, 0.85);
+  --menu-hover: rgba(0, 0, 0, 0.08);
+  --menu-active: rgba(0, 0, 0, 0.15);
+
+  --page-indicator-bg: rgba(255, 255, 255, 0.5);
+  --page-indicator-inactive: rgba(0, 0, 0, 0.3);
+  --page-indicator-active: rgba(0, 0, 0, 0.8);
+
+  --search-bg: rgba(0, 0, 0, 0.08);
+  --search-bg-focus: rgba(0, 0, 0, 0.12);
+  --search-placeholder: rgba(0, 0, 0, 0.4);
+
+  --accent-blue: #007aff;
+  --accent-blue-hover: #0051d5;
+  --accent-blue-active: #004fc7;
+
+  --danger-red: #ff3b30;
+  --danger-red-hover: #ff2d20;
+  --danger-red-active: #ff1f10;
+  --danger-bg: rgba(255, 59, 48, 0.1);
+  --danger-bg-hover: rgba(255, 59, 48, 0.2);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Dark theme colors */
+    --text-primary: rgba(255, 255, 255, 0.95);
+    --text-secondary: rgba(255, 255, 255, 0.85);
+    --text-tertiary: rgba(255, 255, 255, 0.75);
+    --text-quaternary: rgba(255, 255, 255, 0.6);
+
+    --bg-modal: rgba(42, 42, 48, 0.92);
+    --bg-modal-backdrop: rgba(0, 0, 0, 0.5);
+    --bg-secondary: rgba(50, 50, 58, 0.85);
+    --bg-tertiary: rgba(255, 255, 255, 0.05);
+    --bg-quaternary: rgba(255, 255, 255, 0.08);
+
+    --border-primary: rgba(255, 255, 255, 0.12);
+    --border-secondary: rgba(255, 255, 255, 0.1);
+    --border-modal: rgba(255, 255, 255, 0.15);
+
+    --input-bg: rgba(255, 255, 255, 0.08);
+    --input-bg-hover: rgba(255, 255, 255, 0.12);
+    --input-bg-focus: rgba(255, 255, 255, 0.12);
+    --input-border: rgba(255, 255, 255, 0.12);
+    --input-border-hover: rgba(255, 255, 255, 0.2);
+
+    --menu-bg: rgba(50, 50, 58, 0.85);
+    --menu-hover: rgba(255, 255, 255, 0.18);
+    --menu-active: rgba(255, 255, 255, 0.25);
+
+    --page-indicator-bg: rgba(0, 0, 0, 0.3);
+    --page-indicator-inactive: rgba(255, 255, 255, 0.4);
+    --page-indicator-active: rgba(255, 255, 255, 0.9);
+
+    --search-bg: rgba(255, 255, 255, 0.12);
+    --search-bg-focus: rgba(255, 255, 255, 0.18);
+    --search-placeholder: rgba(255, 255, 255, 0.5);
+
+    --accent-blue: #0a84ff;
+    --accent-blue-hover: #0051d5;
+    --accent-blue-active: #004fc7;
+
+    --danger-red: #ff453a;
+    --danger-red-hover: #ff3b30;
+    --danger-red-active: #ff3020;
+    --danger-bg: rgba(255, 100, 100, 0.2);
+    --danger-bg-hover: rgba(255, 100, 100, 0.4);
+  }
 }
 
 html,
@@ -54,8 +146,8 @@ body {
   font-size: 18px;
   border: none;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.12);
-  color: white;
+  background: var(--search-bg);
+  color: var(--text-primary);
   outline: none;
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
@@ -63,12 +155,12 @@ body {
 }
 
 .search-input::placeholder {
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--search-placeholder);
 }
 
 .search-input:focus {
-  background: rgba(255, 255, 255, 0.18);
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.15);
+  background: var(--search-bg-focus);
+  box-shadow: 0 0 0 3px var(--border-primary);
 }
 
 /* Apps Grid */
@@ -214,7 +306,7 @@ body {
 /* App Name */
 .app-name {
   font-size: 13px;
-  color: white;
+  color: var(--text-primary);
   text-align: center;
   max-width: 120px;
   overflow: hidden;
@@ -310,7 +402,7 @@ body {
   gap: 12px;
   z-index: 100;
   padding: 12px 20px;
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--page-indicator-bg);
   border-radius: 20px;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -320,7 +412,7 @@ body {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.4);
+  background: var(--page-indicator-inactive);
   border: none;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -328,14 +420,15 @@ body {
 }
 
 .page-dot:hover {
-  background: rgba(255, 255, 255, 0.6);
+  background: var(--page-indicator-inactive);
+  opacity: 0.8;
   transform: scale(1.2);
 }
 
 .page-dot.active {
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--page-indicator-active);
   transform: scale(1.3);
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+  box-shadow: 0 0 8px var(--page-indicator-active);
 }
 
 /* Folders */
@@ -400,7 +493,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: var(--bg-modal-backdrop);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   display: flex;
@@ -420,13 +513,14 @@ body {
 }
 
 .folder-content {
-  background: rgba(30, 30, 40, 0.95);
+  background: var(--bg-modal);
   border-radius: 24px;
   padding: 32px;
   max-width: 800px;
   max-height: 80vh;
   overflow-y: auto;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--border-modal);
   animation: slideUp 0.3s ease;
 }
 
@@ -453,9 +547,9 @@ body {
   flex: 1;
   font-size: 24px;
   font-weight: 500;
-  color: white;
-  background: rgba(255, 255, 255, 0.1);
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  color: var(--text-primary);
+  background: var(--input-bg);
+  border: 2px solid var(--input-border);
   border-radius: 12px;
   padding: 12px 20px;
   outline: none;
@@ -463,8 +557,8 @@ body {
 }
 
 .folder-name-input:focus {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.4);
+  background: var(--input-bg-focus);
+  border-color: var(--input-border-hover);
 }
 
 .delete-folder {
@@ -472,8 +566,8 @@ body {
   height: 40px;
   border-radius: 50%;
   border: none;
-  background: rgba(255, 100, 100, 0.2);
-  color: white;
+  background: var(--danger-bg);
+  color: var(--text-primary);
   font-size: 20px;
   cursor: pointer;
   display: flex;
@@ -485,7 +579,7 @@ body {
 }
 
 .delete-folder:hover {
-  background: rgba(255, 100, 100, 0.4);
+  background: var(--danger-bg-hover);
   transform: scale(1.1);
 }
 
@@ -494,8 +588,8 @@ body {
   height: 40px;
   border-radius: 50%;
   border: none;
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
+  background: var(--bg-quaternary);
+  color: var(--text-primary);
   font-size: 28px;
   font-weight: 300;
   cursor: pointer;
@@ -508,7 +602,7 @@ body {
 }
 
 .close-folder:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--input-bg-hover);
   transform: scale(1.1);
 }
 
@@ -539,11 +633,11 @@ body {
 /* Context Menu - macOS Tahoe Style */
 .context-menu {
   position: fixed;
-  background: rgba(50, 50, 58, 0.85);
+  background: var(--menu-bg);
   border-radius: 10px;
   padding: 6px;
   box-shadow:
-    0 0 0 0.5px rgba(255, 255, 255, 0.15),
+    0 0 0 0.5px var(--border-modal),
     0 10px 30px rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(60px) saturate(180%);
   -webkit-backdrop-filter: blur(60px) saturate(180%);
@@ -571,7 +665,7 @@ body {
   text-align: left;
   background: transparent;
   border: none;
-  color: rgba(255, 255, 255, 0.95);
+  color: var(--text-primary);
   font-size: 13px;
   cursor: pointer;
   border-radius: 5px;
@@ -581,21 +675,21 @@ body {
 }
 
 .context-menu button:hover {
-  background: rgba(255, 255, 255, 0.18);
+  background: var(--menu-hover);
 }
 
 .context-menu button:active {
-  background: rgba(255, 255, 255, 0.25);
+  background: var(--menu-active);
 }
 
 /* App Context Menu - Individual app right-click menu */
 .app-context-menu {
   position: fixed;
-  background: rgba(50, 50, 58, 0.85);
+  background: var(--menu-bg);
   border-radius: 10px;
   padding: 6px;
   box-shadow:
-    0 0 0 0.5px rgba(255, 255, 255, 0.15),
+    0 0 0 0.5px var(--border-modal),
     0 10px 30px rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(60px) saturate(180%);
   -webkit-backdrop-filter: blur(60px) saturate(180%);
@@ -612,7 +706,7 @@ body {
   text-align: left;
   background: transparent;
   border: none;
-  color: rgba(255, 255, 255, 0.95);
+  color: var(--text-primary);
   font-size: 13px;
   cursor: pointer;
   border-radius: 5px;
@@ -622,31 +716,31 @@ body {
 }
 
 .app-context-menu button:hover {
-  background: rgba(255, 255, 255, 0.18);
+  background: var(--menu-hover);
 }
 
 .app-context-menu button:active {
-  background: rgba(255, 255, 255, 0.25);
+  background: var(--menu-active);
 }
 
 /* Separator in context menus */
 .context-menu-separator {
   height: 1px;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--border-secondary);
   margin: 4px 0;
 }
 
 /* Danger action button (Move to Trash) */
 .context-menu-danger {
-  color: rgba(255, 69, 58, 0.95) !important;
+  color: var(--danger-red) !important;
 }
 
 .context-menu-danger:hover {
-  background: rgba(255, 69, 58, 0.15) !important;
+  background: var(--danger-bg) !important;
 }
 
 .context-menu-danger:active {
-  background: rgba(255, 69, 58, 0.25) !important;
+  background: var(--danger-bg-hover) !important;
 }
 
 /* Grid Settings Modal - macOS Tahoe Style */
@@ -656,7 +750,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--bg-modal-backdrop);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   display: flex;
@@ -667,13 +761,13 @@ body {
 }
 
 .grid-settings-content {
-  background: rgba(42, 42, 48, 0.92);
+  background: var(--bg-modal);
   border-radius: 16px;
   padding: 28px;
   max-width: 480px;
   width: 90%;
   box-shadow:
-    0 0 0 0.5px rgba(255, 255, 255, 0.12),
+    0 0 0 0.5px var(--border-modal),
     0 20px 60px rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(60px) saturate(180%);
   -webkit-backdrop-filter: blur(60px) saturate(180%);
@@ -685,7 +779,7 @@ body {
   margin: 0 0 24px 0;
   font-size: 20px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.95);
+  color: var(--text-primary);
   letter-spacing: -0.02em;
 }
 
@@ -699,14 +793,14 @@ body {
   align-items: center;
   margin-bottom: 10px;
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--text-secondary);
   font-weight: 500;
   letter-spacing: -0.01em;
 }
 
 .grid-setting-value {
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--text-tertiary);
   font-weight: 400;
   font-feature-settings: "tnum";
 }
@@ -715,7 +809,7 @@ body {
   width: 100%;
   height: 4px;
   border-radius: 2px;
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--input-bg);
   outline: none;
   -webkit-appearance: none;
   appearance: none;
@@ -770,22 +864,22 @@ body {
 .grid-setting-info {
   margin-bottom: 24px;
   padding: 14px;
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--bg-tertiary);
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-primary);
 }
 
 .grid-setting-info p {
   margin: 0;
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--text-secondary);
   font-weight: 400;
   line-height: 1.5;
 }
 
 .grid-settings-separator {
   height: 1px;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--border-secondary);
   margin: 24px 0;
 }
 
@@ -793,17 +887,17 @@ body {
   margin: 0 0 20px 0;
   font-size: 15px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--text-primary);
   letter-spacing: -0.01em;
 }
 
 .grid-setting-select {
   width: 100%;
   padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
   border-radius: 8px;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--text-primary);
   font-size: 13px;
   font-weight: 400;
   cursor: pointer;
@@ -813,19 +907,19 @@ body {
 }
 
 .grid-setting-select:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: var(--input-bg-hover);
+  border-color: var(--input-border-hover);
 }
 
 .grid-setting-select:focus {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(0, 122, 255, 0.6);
+  background: var(--input-bg-focus);
+  border-color: var(--accent-blue);
   box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15);
 }
 
 .grid-setting-select option {
-  background: rgb(42, 42, 48);
-  color: rgba(255, 255, 255, 0.9);
+  background: var(--bg-modal);
+  color: var(--text-primary);
 }
 
 .grid-settings-buttons {
@@ -849,32 +943,34 @@ body {
 }
 
 .grid-cancel-button {
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--input-bg);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-secondary);
 }
 
 .grid-cancel-button:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--input-bg-hover);
 }
 
 .grid-cancel-button:active {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--bg-tertiary);
 }
 
 .grid-save-button {
-  background: #007aff;
+  background: var(--system-accent-color, #007aff);
   color: white;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 
 .grid-save-button:hover {
-  background: #0051d5;
+  background: var(--system-accent-color, #007aff);
+  opacity: 0.85;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .grid-save-button:active {
-  background: #004fc7;
+  background: var(--system-accent-color, #007aff);
+  opacity: 0.75;
   transform: scale(0.98);
 }
 
@@ -885,7 +981,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--bg-modal-backdrop);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   display: flex;
@@ -896,13 +992,13 @@ body {
 }
 
 .confirmation-content {
-  background: rgba(42, 42, 48, 0.92);
+  background: var(--bg-modal);
   border-radius: 16px;
   padding: 28px;
   max-width: 420px;
   width: 90%;
   box-shadow:
-    0 0 0 0.5px rgba(255, 255, 255, 0.12),
+    0 0 0 0.5px var(--border-modal),
     0 20px 60px rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(60px) saturate(180%);
   -webkit-backdrop-filter: blur(60px) saturate(180%);
@@ -914,14 +1010,14 @@ body {
   margin: 0 0 12px 0;
   font-size: 20px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.95);
+  color: var(--text-primary);
   letter-spacing: -0.02em;
 }
 
 .confirmation-message {
   margin: 0 0 24px 0;
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.75);
+  color: var(--text-tertiary);
   line-height: 1.5;
   letter-spacing: -0.01em;
 }
@@ -947,31 +1043,31 @@ body {
 }
 
 .confirmation-cancel-button {
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--input-bg);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-secondary);
 }
 
 .confirmation-cancel-button:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--input-bg-hover);
 }
 
 .confirmation-cancel-button:active {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--bg-tertiary);
 }
 
 .confirmation-danger-button {
-  background: #FF453A;
+  background: var(--danger-red);
   color: white;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 
 .confirmation-danger-button:hover {
-  background: #FF3B30;
+  background: var(--danger-red-hover);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .confirmation-danger-button:active {
-  background: #FF3020;
+  background: var(--danger-red-active);
   transform: scale(0.98);
 }

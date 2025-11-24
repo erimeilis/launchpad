@@ -1,0 +1,79 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "loading": "Loading applications...",
+    "retry": "Retry",
+    "appsPerPage": "Apps per page: {{count}}"
+  },
+  "search": {
+    "placeholder": "Search apps",
+    "noResults": "No apps found for \"{{query}}\""
+  },
+  "contextMenu": {
+    "createFolder": "Create Folder",
+    "sortAlphabetically": "Sort Alphabetically",
+    "editApps": "Edit Apps",
+    "doneEditing": "Done Editing",
+    "settings": "Settings"
+  },
+  "appContextMenu": {
+    "open": "Open",
+    "revealInFinder": "Reveal in Finder",
+    "moveToTrash": "Move to Trash",
+    "hideFromLaunchpad": "Hide from Launchpad"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": {
+      "title": "Language",
+      "label": "App Language",
+      "languages": {
+        "en": "English",
+        "es": "Español",
+        "fr": "Français",
+        "de": "Deutsch",
+        "zh": "中文",
+        "ja": "日本語",
+        "uk": "Українська",
+        "pl": "Polski"
+      }
+    },
+    "gridLayout": {
+      "title": "Grid Layout",
+      "rowsPerPage": "Rows per page",
+      "columnsPerPage": "Columns per page",
+      "useFullWidth": "Use full screen width"
+    },
+    "hotCorners": {
+      "title": "Hot Corners",
+      "enable": "Enable hot corner",
+      "cornerPosition": "Corner position",
+      "topLeft": "Top Left",
+      "topRight": "Top Right",
+      "bottomLeft": "Bottom Left",
+      "bottomRight": "Bottom Right",
+      "triggerThreshold": "Trigger threshold (pixels)",
+      "debounceDelay": "Debounce delay (ms)"
+    },
+    "keyboardShortcuts": {
+      "title": "Keyboard Shortcuts",
+      "openLaunchpad": "Open Launchpad",
+      "examplesLabel": "Examples: F4, CommandOrControl+Space, Alt+L",
+      "modifiersLabel": "Modifiers: Cmd/CommandOrControl, Alt/Option, Shift, Ctrl"
+    }
+  },
+  "folder": {
+    "defaultName": "Folder",
+    "newFolderName": "New Folder",
+    "delete": "Delete Folder",
+    "deleteConfirm": "Delete folder \"{{name}}\"?",
+    "deleteMessage": "Apps inside will be moved to the main grid."
+  },
+  "trash": {
+    "title": "Move to Trash?",
+    "message": "Are you sure you want to move \"{{appName}}\" to the Trash?",
+    "confirm": "Move to Trash",
+    "cancel": "Cancel"
+  }
+}

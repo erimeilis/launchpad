@@ -1,0 +1,79 @@
+{
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "loading": "Chargement des applications...",
+    "retry": "Réessayer",
+    "appsPerPage": "Apps par page : {{count}}"
+  },
+  "search": {
+    "placeholder": "Rechercher des apps",
+    "noResults": "Aucune app trouvée pour \"{{query}}\""
+  },
+  "contextMenu": {
+    "createFolder": "Créer un Dossier",
+    "sortAlphabetically": "Trier par Ordre Alphabétique",
+    "editApps": "Modifier les Apps",
+    "doneEditing": "Terminer la Modification",
+    "settings": "Réglages"
+  },
+  "appContextMenu": {
+    "open": "Ouvrir",
+    "revealInFinder": "Afficher dans le Finder",
+    "moveToTrash": "Mettre à la Corbeille",
+    "hideFromLaunchpad": "Masquer du Launchpad"
+  },
+  "settings": {
+    "title": "Réglages",
+    "language": {
+      "title": "Langue",
+      "label": "Langue de l'Application",
+      "languages": {
+        "en": "English",
+        "es": "Español",
+        "fr": "Français",
+        "de": "Deutsch",
+        "zh": "中文",
+        "ja": "日本語",
+        "uk": "Українська",
+        "pl": "Polski"
+      }
+    },
+    "gridLayout": {
+      "title": "Disposition de la Grille",
+      "rowsPerPage": "Lignes par page",
+      "columnsPerPage": "Colonnes par page",
+      "useFullWidth": "Utiliser la largeur plein écran"
+    },
+    "hotCorners": {
+      "title": "Coins Actifs",
+      "enable": "Activer le coin actif",
+      "cornerPosition": "Position du coin",
+      "topLeft": "En Haut à Gauche",
+      "topRight": "En Haut à Droite",
+      "bottomLeft": "En Bas à Gauche",
+      "bottomRight": "En Bas à Droite",
+      "triggerThreshold": "Seuil de déclenchement (pixels)",
+      "debounceDelay": "Délai d'anti-rebond (ms)"
+    },
+    "keyboardShortcuts": {
+      "title": "Raccourcis Clavier",
+      "openLaunchpad": "Ouvrir le Launchpad",
+      "examplesLabel": "Exemples : F4, CommandOrControl+Espace, Alt+L",
+      "modifiersLabel": "Modificateurs : Cmd/CommandOrControl, Alt/Option, Maj, Ctrl"
+    }
+  },
+  "folder": {
+    "defaultName": "Dossier",
+    "newFolderName": "Nouveau Dossier",
+    "delete": "Supprimer le Dossier",
+    "deleteConfirm": "Supprimer le dossier \"{{name}}\" ?",
+    "deleteMessage": "Les apps à l'intérieur seront déplacées vers la grille principale."
+  },
+  "trash": {
+    "title": "Mettre à la Corbeille ?",
+    "message": "Êtes-vous sûr de vouloir mettre \"{{appName}}\" à la Corbeille ?",
+    "confirm": "Mettre à la Corbeille",
+    "cancel": "Annuler"
+  }
+}

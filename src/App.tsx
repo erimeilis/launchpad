@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import "./App.css";
 
 // Type imports
@@ -21,11 +22,13 @@ import { DragGhost } from "./components/DragGhost";
 import { EdgeIndicators } from "./components/EdgeIndicators";
 import { ContextMenu } from "./components/ContextMenu";
 import { AppContextMenu } from "./components/AppContextMenu";
-import { GridSettings } from "./components/GridSettings";
+import { Settings } from "./components/Settings";
 import { DeleteConfirmation } from "./components/DeleteConfirmation";
 import { TrashConfirmation } from "./components/TrashConfirmation";
 
 function App() {
+  const { t } = useTranslation();
+
   // App management state and functions
   const {
     apps,
@@ -482,14 +485,14 @@ function App() {
 
       {loading && (
         <div className="loading">
-          <p>Loading applications...</p>
+          <p>{t("common.loading")}</p>
         </div>
       )}
 
       {error && (
         <div className="error">
           <p>{error}</p>
-          <button onClick={loadApps}>Retry</button>
+          <button onClick={loadApps}>{t("common.retry")}</button>
         </div>
       )}
 
@@ -588,7 +591,7 @@ function App() {
 
       {!loading && !error && currentItems.length === 0 && searchQuery && (
         <div className="no-results">
-          <p>No apps found for "{searchQuery}"</p>
+          <p>{t("search.noResults", { query: searchQuery })}</p>
         </div>
       )}
 
@@ -617,8 +620,31 @@ function App() {
         <ContextMenu
           position={contextMenu}
           onCreateFolder={() => {
+            const currentItemCount = visibleItems.length;
             createFolder();
             setContextMenu(null);
+
+            // Wait for items to update, then navigate to last page
+            setTimeout(() => {
+              // New folder will be at the end after merge
+              const newItemCount = currentItemCount + 1;
+              const totalPages = Math.ceil(newItemCount / APPS_PER_PAGE);
+              const lastPage = Math.max(0, totalPages - 1);
+
+              console.log('Create folder navigation:', {
+                currentItemCount,
+                newItemCount,
+                APPS_PER_PAGE,
+                totalPages,
+                lastPage,
+                currentPage,
+                willNavigate: lastPage !== currentPage
+              });
+
+              if (lastPage !== currentPage) {
+                setCurrentPage(lastPage);
+              }
+            }, 150);
           }}
           onGridSettings={() => {
             setShowGridSettings(true);
@@ -633,9 +659,9 @@ function App() {
         />
       )}
 
-      {/* Grid Settings Modal */}
+      {/* Settings Modal */}
       {showGridSettings && (
-        <GridSettings
+        <Settings
           settings={gridSettings}
           onSettingsChange={setGridSettings}
           onSave={saveGridSettings}

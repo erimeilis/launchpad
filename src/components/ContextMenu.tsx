@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { ContextMenuPosition } from "../types";
 
 interface ContextMenuProps {
@@ -20,16 +21,20 @@ export function ContextMenu({
   onEditApps,
   editMode,
 }: ContextMenuProps) {
+  const { t } = useTranslation();
+
   return (
     <div
       className="context-menu"
       style={{ left: position.x, top: position.y }}
       onClick={(e) => e.stopPropagation()}
     >
-      <button onClick={onCreateFolder}>Create Folder</button>
-      <button onClick={onSortAlphabetically}>Sort Alphabetically</button>
-      <button onClick={onEditApps}>{editMode ? "Done Editing" : "Edit Apps"}</button>
-      <button onClick={onGridSettings}>Grid Settings</button>
+      <button onClick={onCreateFolder}>{t("contextMenu.createFolder")}</button>
+      <button onClick={onSortAlphabetically}>{t("contextMenu.sortAlphabetically")}</button>
+      <button onClick={onEditApps}>
+        {editMode ? t("contextMenu.doneEditing") : t("contextMenu.editApps")}
+      </button>
+      <button onClick={onGridSettings}>{t("contextMenu.settings")}</button>
     </div>
   );
 }

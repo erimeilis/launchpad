@@ -1,0 +1,79 @@
+{
+  "common": {
+    "save": "Sichern",
+    "cancel": "Abbrechen",
+    "loading": "Anwendungen werden geladen...",
+    "retry": "Wiederholen",
+    "appsPerPage": "Apps pro Seite: {{count}}"
+  },
+  "search": {
+    "placeholder": "Apps suchen",
+    "noResults": "Keine Apps gefunden für \"{{query}}\""
+  },
+  "contextMenu": {
+    "createFolder": "Ordner Erstellen",
+    "sortAlphabetically": "Alphabetisch Sortieren",
+    "editApps": "Apps Bearbeiten",
+    "doneEditing": "Bearbeitung Beenden",
+    "settings": "Einstellungen"
+  },
+  "appContextMenu": {
+    "open": "Öffnen",
+    "revealInFinder": "Im Finder Anzeigen",
+    "moveToTrash": "In den Papierkorb",
+    "hideFromLaunchpad": "Aus Launchpad Ausblenden"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "language": {
+      "title": "Sprache",
+      "label": "App-Sprache",
+      "languages": {
+        "en": "English",
+        "es": "Español",
+        "fr": "Français",
+        "de": "Deutsch",
+        "zh": "中文",
+        "ja": "日本語",
+        "uk": "Українська",
+        "pl": "Polski"
+      }
+    },
+    "gridLayout": {
+      "title": "Rasterlayout",
+      "rowsPerPage": "Zeilen pro Seite",
+      "columnsPerPage": "Spalten pro Seite",
+      "useFullWidth": "Vollbildbreite verwenden"
+    },
+    "hotCorners": {
+      "title": "Aktive Ecken",
+      "enable": "Aktive Ecke aktivieren",
+      "cornerPosition": "Eckenposition",
+      "topLeft": "Oben Links",
+      "topRight": "Oben Rechts",
+      "bottomLeft": "Unten Links",
+      "bottomRight": "Unten Rechts",
+      "triggerThreshold": "Auslöseschwelle (Pixel)",
+      "debounceDelay": "Entprellverzögerung (ms)"
+    },
+    "keyboardShortcuts": {
+      "title": "Tastaturkürzel",
+      "openLaunchpad": "Launchpad Öffnen",
+      "examplesLabel": "Beispiele: F4, CommandOrControl+Leertaste, Alt+L",
+      "modifiersLabel": "Modifikatoren: Cmd/CommandOrControl, Alt/Option, Umschalt, Strg"
+    }
+  },
+  "folder": {
+    "defaultName": "Ordner",
+    "newFolderName": "Neuer Ordner",
+    "delete": "Ordner Löschen",
+    "deleteConfirm": "Ordner \"{{name}}\" löschen?",
+    "deleteMessage": "Apps darin werden zum Hauptraster verschoben."
+  },
+  "trash": {
+    "title": "In den Papierkorb?",
+    "message": "Möchten Sie \"{{appName}}\" wirklich in den Papierkorb verschieben?",
+    "confirm": "In den Papierkorb",
+    "cancel": "Abbrechen"
+  }
+}

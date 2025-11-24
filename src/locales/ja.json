@@ -1,0 +1,79 @@
+{
+  "common": {
+    "save": "保存",
+    "cancel": "キャンセル",
+    "loading": "アプリケーションを読み込んでいます...",
+    "retry": "再試行",
+    "appsPerPage": "ページあたりのアプリ数：{{count}}"
+  },
+  "search": {
+    "placeholder": "アプリを検索",
+    "noResults": "「{{query}}」に一致するアプリが見つかりませんでした"
+  },
+  "contextMenu": {
+    "createFolder": "フォルダを作成",
+    "sortAlphabetically": "アルファベット順に並べ替え",
+    "editApps": "アプリを編集",
+    "doneEditing": "編集を終了",
+    "settings": "設定"
+  },
+  "appContextMenu": {
+    "open": "開く",
+    "revealInFinder": "Finderで表示",
+    "moveToTrash": "ゴミ箱に入れる",
+    "hideFromLaunchpad": "Launchpadから隠す"
+  },
+  "settings": {
+    "title": "設定",
+    "language": {
+      "title": "言語",
+      "label": "アプリの言語",
+      "languages": {
+        "en": "English",
+        "es": "Español",
+        "fr": "Français",
+        "de": "Deutsch",
+        "zh": "中文",
+        "ja": "日本語",
+        "uk": "Українська",
+        "pl": "Polski"
+      }
+    },
+    "gridLayout": {
+      "title": "グリッドレイアウト",
+      "rowsPerPage": "ページあたりの行数",
+      "columnsPerPage": "ページあたりの列数",
+      "useFullWidth": "フルスクリーン幅を使用"
+    },
+    "hotCorners": {
+      "title": "ホットコーナー",
+      "enable": "ホットコーナーを有効にする",
+      "cornerPosition": "コーナーの位置",
+      "topLeft": "左上",
+      "topRight": "右上",
+      "bottomLeft": "左下",
+      "bottomRight": "右下",
+      "triggerThreshold": "トリガーしきい値（ピクセル）",
+      "debounceDelay": "デバウンス遅延（ミリ秒）"
+    },
+    "keyboardShortcuts": {
+      "title": "キーボードショートカット",
+      "openLaunchpad": "Launchpadを開く",
+      "examplesLabel": "例：F4、CommandOrControl+スペース、Alt+L",
+      "modifiersLabel": "修飾キー：Cmd/CommandOrControl、Alt/Option、Shift、Ctrl"
+    }
+  },
+  "folder": {
+    "defaultName": "フォルダ",
+    "newFolderName": "新しいフォルダ",
+    "delete": "フォルダを削除",
+    "deleteConfirm": "フォルダ「{{name}}」を削除しますか？",
+    "deleteMessage": "中のアプリはメイングリッドに移動されます。"
+  },
+  "trash": {
+    "title": "ゴミ箱に入れますか？",
+    "message": "「{{appName}}」をゴミ箱に入れてもよろしいですか？",
+    "confirm": "ゴミ箱に入れる",
+    "cancel": "キャンセル"
+  }
+}

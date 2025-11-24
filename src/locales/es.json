@@ -1,0 +1,79 @@
+{
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "loading": "Cargando aplicaciones...",
+    "retry": "Reintentar",
+    "appsPerPage": "Apps por página: {{count}}"
+  },
+  "search": {
+    "placeholder": "Buscar apps",
+    "noResults": "No se encontraron apps para \"{{query}}\""
+  },
+  "contextMenu": {
+    "createFolder": "Crear Carpeta",
+    "sortAlphabetically": "Ordenar Alfabéticamente",
+    "editApps": "Editar Apps",
+    "doneEditing": "Terminar Edición",
+    "settings": "Ajustes"
+  },
+  "appContextMenu": {
+    "open": "Abrir",
+    "revealInFinder": "Mostrar en Finder",
+    "moveToTrash": "Mover a la Papelera",
+    "hideFromLaunchpad": "Ocultar del Launchpad"
+  },
+  "settings": {
+    "title": "Ajustes",
+    "language": {
+      "title": "Idioma",
+      "label": "Idioma de la Aplicación",
+      "languages": {
+        "en": "English",
+        "es": "Español",
+        "fr": "Français",
+        "de": "Deutsch",
+        "zh": "中文",
+        "ja": "日本語",
+        "uk": "Українська",
+        "pl": "Polski"
+      }
+    },
+    "gridLayout": {
+      "title": "Diseño de Cuadrícula",
+      "rowsPerPage": "Filas por página",
+      "columnsPerPage": "Columnas por página",
+      "useFullWidth": "Usar ancho completo de pantalla"
+    },
+    "hotCorners": {
+      "title": "Esquinas Activas",
+      "enable": "Activar esquina activa",
+      "cornerPosition": "Posición de la esquina",
+      "topLeft": "Superior Izquierda",
+      "topRight": "Superior Derecha",
+      "bottomLeft": "Inferior Izquierda",
+      "bottomRight": "Inferior Derecha",
+      "triggerThreshold": "Umbral de activación (píxeles)",
+      "debounceDelay": "Retardo de rebote (ms)"
+    },
+    "keyboardShortcuts": {
+      "title": "Atajos de Teclado",
+      "openLaunchpad": "Abrir Launchpad",
+      "examplesLabel": "Ejemplos: F4, CommandOrControl+Espacio, Alt+L",
+      "modifiersLabel": "Modificadores: Cmd/CommandOrControl, Alt/Opción, Mayús, Ctrl"
+    }
+  },
+  "folder": {
+    "defaultName": "Carpeta",
+    "newFolderName": "Nueva Carpeta",
+    "delete": "Eliminar Carpeta",
+    "deleteConfirm": "¿Eliminar carpeta \"{{name}}\"?",
+    "deleteMessage": "Las apps dentro se moverán a la cuadrícula principal."
+  },
+  "trash": {
+    "title": "¿Mover a la Papelera?",
+    "message": "¿Estás seguro de que quieres mover \"{{appName}}\" a la Papelera?",
+    "confirm": "Mover a la Papelera",
+    "cancel": "Cancelar"
+  }
+}
