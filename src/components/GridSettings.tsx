@@ -135,6 +135,37 @@ export function GridSettings({ settings, onSettingsChange, onSave, onClose }: Gr
           </>
         )}
 
+        <div className="grid-settings-separator" />
+
+        <h3 className="grid-settings-section-header">Global Shortcut</h3>
+
+        <div className="grid-setting-item">
+          <label className="grid-setting-label">
+            <span>Keyboard shortcut to open Launchpad</span>
+          </label>
+          <input
+            type="text"
+            className="grid-setting-input"
+            value={settings.globalShortcut}
+            onChange={(e) => onSettingsChange({ ...settings, globalShortcut: e.target.value.toUpperCase() })}
+            placeholder="F4"
+            style={{
+              width: "100%",
+              padding: "8px 12px",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              borderRadius: "6px",
+              background: "rgba(255, 255, 255, 0.1)",
+              color: "#fff",
+              fontSize: "14px",
+              fontFamily: "monospace",
+            }}
+          />
+          <div className="grid-setting-info" style={{ marginTop: "8px", fontSize: "12px" }}>
+            <p>Examples: F4, CommandOrControl+Space, Alt+L</p>
+            <p>Modifiers: Cmd/CommandOrControl, Alt/Option, Shift, Ctrl</p>
+          </div>
+        </div>
+
         <div className="grid-settings-buttons">
           <button className="grid-cancel-button" onClick={onClose}>
             Cancel

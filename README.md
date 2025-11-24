@@ -11,7 +11,7 @@
 - **🔍 Real-Time Search** - Instant app filtering, searches inside folders too
 - **📱 Multi-Page Support** - Organize hundreds of apps across multiple pages
 - **🎨 Native macOS Vibrancy** - Beautiful glass effect with desktop wallpaper blur
-- **⌨️ Keyboard Shortcuts** - F4 to open, Esc to close, arrows for navigation
+- **⌨️ Customizable Keyboard Shortcuts** - Default F4 to open (fully customizable), Esc to close, arrows for navigation
 - **🖱️ Drag & Drop** - Rearrange apps freely, drag between pages with edge detection
 - **🗑️ App Management** - Right-click apps to open, reveal in Finder, hide, or move to Trash
 - **🖼️ Multi-Monitor Support** - Smart window positioning on the monitor with cursor focus
@@ -66,7 +66,7 @@ npm run tauri build
 
 ### Opening Launchpad
 
-- Press **F4** (default)
+- Press your **keyboard shortcut** (default: F4, customizable in Settings)
 - Click the Launchpad icon in Applications
 - **Hot Corners** - Move mouse to configured corner (Settings → Hot Corner)
 - _Note: Trackpad gestures coming soon_
@@ -102,6 +102,10 @@ npm run tauri build
   - Choose corner: Top-left, Top-right, Bottom-left, Bottom-right
   - Adjust trigger threshold (5-50 pixels)
   - Set debounce delay (100-1000ms)
+- **Keyboard Shortcut Customization** - Change the global shortcut to open Launchpad
+  - Default: F4
+  - Examples: CommandOrControl+Space, Alt+L, Shift+F5
+  - Supports modifiers: Cmd/CommandOrControl, Alt/Option, Shift, Ctrl
 - **Edit Mode** - Toggle jiggling animation for easy rearrangement
 
 ## 🏗️ Project Structure
@@ -150,9 +154,9 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 - [x] Single instance enforcement
 - [x] App context menu (reveal in Finder, move to Trash, hide)
 - [x] Hot corners activation (configurable corner, threshold, debounce)
+- [x] Customizable global keyboard shortcuts
 
 **Planned:**
-- [ ] Global keyboard shortcut customization (F4 + custom)
 - [ ] Trackpad gestures (pinch to open/close)
 - [ ] iCloud sync for app layouts
 - [ ] Auto-categorization option (optional)

@@ -89,6 +89,7 @@ function App() {
       hotCorner: "top-left",
       hotCornerThreshold: 10,
       hotCornerDebounce: 300,
+      globalShortcut: "F4",
     };
 
     if (saved) {
@@ -315,35 +316,54 @@ function App() {
     };
   }, []);
 
-  // Listen for hot corner trigger events
+  // Listen for hot corner and global shortcut trigger events
   useEffect(() => {
-    let unlisten: (() => void) | undefined;
+    let unlistenHotCorner: (() => void) | undefined;
+    let unlistenShortcut: (() => void) | undefined;
 
-    async function setupHotCornerListener() {
+    async function setupListeners() {
       const { getCurrentWindow } = await import("@tauri-apps/api/window");
       const { listen } = await import("@tauri-apps/api/event");
+      const { invoke } = await import("@tauri-apps/api/core");
+      const appWindow = getCurrentWindow();
 
-      unlisten = await listen("hot-corner-triggered", async () => {
-        const appWindow = getCurrentWindow();
-        const { invoke } = await import("@tauri-apps/api/core");
-
+      // Hot corner trigger
+      unlistenHotCorner = await listen("hot-corner-triggered", async () => {
         try {
-          // Position window on cursor's monitor and show
           await invoke("position_on_cursor_monitor");
         } catch (err) {
           console.error("Failed to show window from hot corner:", err);
-          // Fallback: just show the window
           await appWindow.show();
         }
       });
+
+      // Global shortcut trigger
+      unlistenShortcut = await listen("global-shortcut-triggered", async () => {
+        try {
+          await invoke("position_on_cursor_monitor");
+        } catch (err) {
+          console.error("Failed to show window from shortcut:", err);
+          await appWindow.show();
+        }
+      });
+
+      // Register user's saved shortcut on startup
+      try {
+        await invoke("register_global_shortcut", {
+          shortcut: gridSettings.globalShortcut,
+        });
+      } catch (err) {
+        console.error("Failed to register saved shortcut on startup:", err);
+      }
     }
 
-    setupHotCornerListener();
+    setupListeners();
 
     return () => {
-      if (unlisten) unlisten();
+      if (unlistenHotCorner) unlistenHotCorner();
+      if (unlistenShortcut) unlistenShortcut();
     };
-  }, []);
+  }, [gridSettings.globalShortcut]);
 
   // Context menu handler
   function handleContextMenu(e: React.MouseEvent) {
@@ -361,8 +381,9 @@ function App() {
   async function saveGridSettings() {
     localStorage.setItem("launchpad-grid-settings", JSON.stringify(gridSettings));
 
-    // Apply hot corner settings
     const { invoke } = await import("@tauri-apps/api/core");
+
+    // Apply hot corner settings
     try {
       if (gridSettings.hotCornerEnabled) {
         await invoke("enable_hot_corner", {
@@ -375,6 +396,15 @@ function App() {
       }
     } catch (err) {
       console.error("Failed to update hot corner settings:", err);
+    }
+
+    // Register global shortcut
+    try {
+      await invoke("register_global_shortcut", {
+        shortcut: gridSettings.globalShortcut,
+      });
+    } catch (err) {
+      console.error("Failed to register global shortcut:", err);
     }
 
     setShowGridSettings(false);

@@ -38,6 +38,7 @@ export interface GridSettings {
   hotCorner: string;
   hotCornerThreshold: number;
   hotCornerDebounce: number;
+  globalShortcut: string;
 }
 
 /**

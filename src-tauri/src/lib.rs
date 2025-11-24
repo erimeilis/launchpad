@@ -301,10 +301,36 @@ async fn position_on_cursor_monitor(app: tauri::AppHandle) -> Result<(), String>
     Ok(())
 }
 
+#[tauri::command]
+fn register_global_shortcut(app: tauri::AppHandle, shortcut: String) -> Result<(), String> {
+    use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut};
+
+    // Unregister any existing shortcuts first
+    let _ = app.global_shortcut().unregister_all();
+
+    // Parse and register the new shortcut
+    let shortcut_key: Shortcut = shortcut
+        .parse()
+        .map_err(|e| format!("Invalid shortcut format: {}", e))?;
+
+    app.global_shortcut()
+        .on_shortcut(shortcut_key, move |app, _shortcut, _event| {
+            if let Some(window) = app.get_webview_window("main") {
+                let _ = window.emit("global-shortcut-triggered", ());
+            }
+        })
+        .map_err(|e| format!("Failed to register shortcut: {}", e))?;
+
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    use tauri_plugin_global_shortcut::{Builder as ShortcutBuilder, GlobalShortcutExt};
+
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(ShortcutBuilder::new().build())
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
             // When a second instance is launched, focus the existing window
             if let Some(window) = app.get_webview_window("main") {
@@ -320,7 +346,8 @@ pub fn run() {
             reveal_in_finder,
             position_on_cursor_monitor,
             enable_hot_corner,
-            disable_hot_corner
+            disable_hot_corner,
+            register_global_shortcut
         ])
         .setup(|app| {
             let window = app.get_webview_window("main").unwrap();
@@ -344,6 +371,18 @@ pub fn run() {
             );
             // DON'T start the monitor here - it will be started when user enables it in settings
             let _ = HOT_CORNER_MONITOR.set(monitor);
+
+            // Register default global shortcut (F4)
+            // Frontend will override this with user's saved preference if different
+            use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut};
+            let default_shortcut: Shortcut = "F4".parse().unwrap();
+            let _ = app
+                .global_shortcut()
+                .on_shortcut(default_shortcut, move |app_h, _shortcut, _event| {
+                    if let Some(window) = app_h.get_webview_window("main") {
+                        let _ = window.emit("global-shortcut-triggered", ());
+                    }
+                });
 
             Ok(())
         })
