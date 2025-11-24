@@ -203,24 +203,86 @@ fn reveal_in_finder(app_path: String) -> Result<(), String> {
     Ok(())
 }
 
+#[tauri::command]
+async fn position_on_cursor_monitor(app: tauri::AppHandle) -> Result<(), String> {
+    use tauri::LogicalPosition;
+
+    // Get the main window
+    let window = app
+        .get_webview_window("main")
+        .ok_or("Main window not found")?;
+
+    // Get cursor position
+    let cursor_pos = window
+        .cursor_position()
+        .map_err(|e| format!("Failed to get cursor position: {}", e))?;
+
+    // Find monitor containing cursor
+    let monitor = window
+        .monitor_from_point(cursor_pos.x, cursor_pos.y)
+        .map_err(|e| format!("Failed to get monitor from point: {}", e))?
+        .ok_or("No monitor found at cursor position")?;
+
+    // Get monitor's work area (excludes menu bar and dock)
+    let work_area = monitor.work_area();
+    let monitor_x = work_area.position.x;
+    let monitor_y = work_area.position.y;
+    let monitor_width = work_area.size.width;
+    let monitor_height = work_area.size.height;
+
+    // Get window's outer size
+    let window_size = window
+        .outer_size()
+        .map_err(|e| format!("Failed to get window size: {}", e))?;
+
+    // Calculate centered position on the monitor
+    let x = monitor_x + ((monitor_width - window_size.width) / 2) as i32;
+    let y = monitor_y + ((monitor_height - window_size.height) / 2) as i32;
+
+    // Position window
+    window
+        .set_position(LogicalPosition::new(x, y))
+        .map_err(|e| format!("Failed to set window position: {}", e))?;
+
+    // Show and focus the window
+    window
+        .show()
+        .map_err(|e| format!("Failed to show window: {}", e))?;
+    window
+        .set_focus()
+        .map_err(|e| format!("Failed to focus window: {}", e))?;
+
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+            // When a second instance is launched, focus the existing window
+            if let Some(window) = app.get_webview_window("main") {
+                let _ = window.show();
+                let _ = window.set_focus();
+                let _ = window.unminimize();
+            }
+        }))
         .invoke_handler(tauri::generate_handler![
             get_installed_apps,
             launch_app,
             move_app_to_trash,
-            reveal_in_finder
+            reveal_in_finder,
+            position_on_cursor_monitor
         ])
         .setup(|app| {
             let window = app.get_webview_window("main").unwrap();
 
             #[cfg(target_os = "macos")]
             {
-                use window_vibrancy::{apply_vibrancy, NSVisualEffectMaterial};
+                use window_vibrancy::{apply_vibrancy, NSVisualEffectMaterial, NSVisualEffectState};
 
-                apply_vibrancy(&window, NSVisualEffectMaterial::HudWindow, None, None)
+                // Use Active state to keep the glass effect even when window loses focus
+                apply_vibrancy(&window, NSVisualEffectMaterial::HudWindow, Some(NSVisualEffectState::Active), None)
                     .expect("Unsupported platform! 'apply_vibrancy' is only supported on macOS");
             }
 

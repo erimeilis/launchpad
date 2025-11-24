@@ -217,6 +217,87 @@ function App() {
     }
   }, [contextMenu, appContextMenu]);
 
+  // Position window on cursor's monitor when app starts
+  useEffect(() => {
+    async function positionWindow() {
+      const { invoke } = await import("@tauri-apps/api/core");
+      try {
+        await invoke("position_on_cursor_monitor");
+      } catch (err) {
+        console.error("Failed to position window on cursor monitor:", err);
+        // Fallback: just show the window
+        const { getCurrentWindow } = await import("@tauri-apps/api/window");
+        await getCurrentWindow().show();
+      }
+    }
+
+    positionWindow();
+  }, []);
+
+  // Multi-monitor aware focus handling
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    let currentDisplayMonitor: { name: string | null; position: { x: number; y: number } } | null = null;
+
+    async function setupFocusListener() {
+      const { getCurrentWindow, currentMonitor, cursorPosition, monitorFromPoint } = await import("@tauri-apps/api/window");
+      const appWindow = getCurrentWindow();
+
+      // Store which monitor Launchpad is currently on
+      try {
+        const monitor = await currentMonitor();
+        if (monitor) {
+          currentDisplayMonitor = {
+            name: monitor.name,
+            position: monitor.position,
+          };
+        }
+      } catch (err) {
+        console.error("Failed to get current monitor:", err);
+      }
+
+      unlisten = await appWindow.onFocusChanged(async ({ payload: focused }) => {
+        if (!focused) {
+          try {
+            // Get cursor position when focus was lost
+            const cursor = await cursorPosition();
+
+            // Find which monitor the cursor is on
+            const cursorMonitor = await monitorFromPoint(cursor.x, cursor.y);
+
+            // Only minimize if click was on the same monitor as Launchpad
+            if (currentDisplayMonitor && cursorMonitor) {
+              // Compare monitors by name and position (in case name is null)
+              const sameMonitor =
+                (cursorMonitor.name && cursorMonitor.name === currentDisplayMonitor.name) ||
+                (cursorMonitor.position.x === currentDisplayMonitor.position.x &&
+                 cursorMonitor.position.y === currentDisplayMonitor.position.y);
+
+              if (sameMonitor) {
+                // Click was on same monitor - minimize Launchpad
+                await appWindow.minimize();
+              }
+              // If different monitor: do nothing, let focus stay on other monitor
+            } else {
+              // Fallback: if we can't determine monitors, minimize (safe default)
+              await appWindow.minimize();
+            }
+          } catch (err) {
+            console.error("Failed to handle focus change:", err);
+            // On error, minimize as fallback
+            await appWindow.minimize();
+          }
+        }
+      });
+    }
+
+    setupFocusListener();
+
+    return () => {
+      if (unlisten) unlisten();
+    };
+  }, []);
+
   // Context menu handler
   function handleContextMenu(e: React.MouseEvent) {
     e.preventDefault();
