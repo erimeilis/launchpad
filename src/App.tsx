@@ -1,10 +1,13 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import "./App.css";
 
 // Type imports
-import type { GridSettings as GridSettingsType } from "./types";
+import type { GridSettings as GridSettingsType, Tag, App } from "./types";
 import { isFolder } from "./types";
+
+// Constants
+import { PREDEFINED_TAGS, getIconByName } from "./constants/tags";
 
 // Hook imports
 import { useAppManagement } from "./hooks/useAppManagement";
@@ -14,6 +17,7 @@ import { useKeyboardNavigation } from "./hooks/useKeyboardNavigation";
 
 // Component imports
 import { SearchBar } from "./components/SearchBar";
+import { TagBar } from "./components/TagBar";
 import { AppItem } from "./components/AppItem";
 import { FolderItem } from "./components/FolderItem";
 import { FolderModal } from "./components/FolderModal";
@@ -22,9 +26,18 @@ import { DragGhost } from "./components/DragGhost";
 import { EdgeIndicators } from "./components/EdgeIndicators";
 import { ContextMenu } from "./components/ContextMenu";
 import { AppContextMenu } from "./components/AppContextMenu";
-import { Settings } from "./components/Settings";
 import { DeleteConfirmation } from "./components/DeleteConfirmation";
+import {
+  LanguageSettings,
+  GridLayoutSettings,
+  HotCornersSettings,
+  KeyboardShortcutsSettings,
+  CustomTagsSettings,
+} from "./components/settings";
 import { TrashConfirmation } from "./components/TrashConfirmation";
+import { AboutDialog } from "./components/AboutDialog";
+import { CreateTagModal } from "./components/CreateTagModal";
+import { Button } from "./components/ui/Button";
 
 function App() {
   const { t } = useTranslation();
@@ -66,7 +79,14 @@ function App() {
     appPath: string;
     bundleId: string;
   } | null>(null);
-  const [showGridSettings, setShowGridSettings] = useState(false);
+  // Settings modals state
+  const [showLanguageSettings, setShowLanguageSettings] = useState(false);
+  const [showGridLayoutSettings, setShowGridLayoutSettings] = useState(false);
+  const [showHotCornersSettings, setShowHotCornersSettings] = useState(false);
+  const [showKeyboardShortcutsSettings, setShowKeyboardShortcutsSettings] = useState(false);
+  const [showCustomTagsSettings, setShowCustomTagsSettings] = useState(false);
+  const [showAboutDialog, setShowAboutDialog] = useState(false);
+  const [showCreateTagModal, setShowCreateTagModal] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState<{
     folderId: string;
     folderName: string;
@@ -76,9 +96,36 @@ function App() {
     appPath: string;
   } | null>(null);
   const [editMode, setEditMode] = useState(false);
-  const [hiddenApps, setHiddenApps] = useState<Set<string>>(() => {
-    const saved = localStorage.getItem("launchpad-hidden-apps");
-    return saved ? new Set(JSON.parse(saved)) : new Set();
+
+  // Tag state
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [availableTags, setAvailableTags] = useState<Tag[]>([]);
+
+  // Tag assignments persistence (bundleId -> array of tag keys)
+  const [tagAssignments, setTagAssignments] = useState<Record<string, string[]>>(() => {
+    const saved = localStorage.getItem("launchpad-tag-assignments");
+    return saved ? JSON.parse(saved) : {};
+  });
+  const [customTags, setCustomTags] = useState<{
+    key: string;
+    label: string;
+    iconName: string;
+  }[]>(() => {
+    const saved = localStorage.getItem("launchpad-custom-tags");
+    if (!saved) return [];
+
+    // Deduplicate tags by key (keep the last occurrence)
+    const parsed = JSON.parse(saved) as { key: string; label: string; iconName: string }[];
+    const uniqueByKey = new Map<string, { key: string; label: string; iconName: string }>();
+    parsed.forEach(tag => uniqueByKey.set(tag.key, tag));
+    const deduplicated = Array.from(uniqueByKey.values());
+
+    // Save deduplicated version back if there were duplicates
+    if (deduplicated.length !== parsed.length) {
+      localStorage.setItem("launchpad-custom-tags", JSON.stringify(deduplicated));
+    }
+
+    return deduplicated;
   });
 
   // Grid settings
@@ -93,6 +140,11 @@ function App() {
       hotCornerThreshold: 10,
       hotCornerDebounce: 300,
       globalShortcut: "F4",
+      tagSettings: {
+        showTagBar: true,
+        autoTagNewApps: true,
+        customTags: [],
+      },
     };
 
     if (saved) {
@@ -112,6 +164,7 @@ function App() {
     draggedIndex,
     draggedItem,
     dragOverIndex,
+    iconHoverIndex,
     isDragging,
     mousePos,
     previewTargetIndex,
@@ -141,31 +194,47 @@ function App() {
           }
         })
       : items,
-    searchQuery,
+    isFiltering: !!searchQuery || !!selectedTag,
     gridSettings,
     saveItemOrder,
     saveFolders,
   });
 
-  // Filter out hidden apps from items
-  const visibleItems = items.filter((item) => {
-    if (isFolder(item)) return true; // Never hide folders
-    return !hiddenApps.has(item.bundle_id);
-  });
+  // Apply tag filtering and search filtering
+  const filteredItems = useMemo(() => {
+    let result = items;
 
-  // Use visibleItems instead of items for display
-  const filteredItems = searchQuery
-    ? visibleItems.filter((item) => {
+    // Filter by selected tag (exclude folders from tag views - only show on "All")
+    if (selectedTag) {
+      result = result.filter((item) => {
+        // Exclude all folders when a tag is selected
+        if (isFolder(item)) {
+          return false;
+        } else {
+          const app = item as App;
+          return app.tags?.includes(selectedTag);
+        }
+      });
+    }
+
+    // Filter by search query
+    if (searchQuery) {
+      result = result.filter((item) => {
         if (isFolder(item)) {
           return (
             item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            item.apps.some((app) => app.name.toLowerCase().includes(searchQuery.toLowerCase()))
+            item.apps.some((app) =>
+              app.name.toLowerCase().includes(searchQuery.toLowerCase()),
+            )
           );
         } else {
           return item.name.toLowerCase().includes(searchQuery.toLowerCase());
         }
-      })
-    : visibleItems;
+      });
+    }
+
+    return result;
+  }, [items, selectedTag, searchQuery]);
 
   // Create preview items array while dragging
   const displayItems = (() => {
@@ -184,14 +253,39 @@ function App() {
   const endIndex = startIndex + APPS_PER_PAGE;
   const currentItems = searchQuery ? displayItems : displayItems.slice(startIndex, endIndex);
 
+  // Settings modal helpers
+  const isAnySettingsOpen =
+    showLanguageSettings ||
+    showGridLayoutSettings ||
+    showHotCornersSettings ||
+    showKeyboardShortcutsSettings ||
+    showCustomTagsSettings;
+
+  // Check if ANY modal is open (to block context menus)
+  const isAnyModalOpen =
+    isAnySettingsOpen ||
+    showAboutDialog ||
+    showCreateTagModal ||
+    openFolder !== null ||
+    deleteConfirmation !== null ||
+    trashConfirmation !== null;
+
+  const closeAllSettings = () => {
+    setShowLanguageSettings(false);
+    setShowGridLayoutSettings(false);
+    setShowHotCornersSettings(false);
+    setShowKeyboardShortcutsSettings(false);
+    setShowCustomTagsSettings(false);
+  };
+
   // Keyboard navigation
   useKeyboardNavigation({
     filteredItemsLength: filteredItems.length,
     appsPerPage: APPS_PER_PAGE,
     setCurrentPage,
     searchQuery,
-    showGridSettings,
-    setShowGridSettings,
+    isAnySettingsOpen,
+    closeAllSettings,
     openFolder,
     setOpenFolder,
     deleteConfirmation,
@@ -204,27 +298,100 @@ function App() {
     setAppContextMenu,
   });
 
-  // Merge apps and folders into items array
+  // Merge apps and folders into items array, applying persisted tag assignments
   useEffect(() => {
     if (apps.length > 0) {
+      // Apply persisted tag assignments to apps
+      const appsWithTags = apps.map((app) => {
+        const savedTags = tagAssignments[app.bundle_id];
+        if (savedTags && savedTags.length > 0) {
+          // Merge persisted tags with any auto-tags from Rust
+          const autoTags = app.tags || [];
+          const mergedTags = [...new Set([...autoTags, ...savedTags])];
+          return { ...app, tags: mergedTags };
+        }
+        return app;
+      });
+
       // Auto-create System and Utilities folders if they don't exist
-      const updatedFolders = createSystemFolders(apps, folders);
+      const updatedFolders = createSystemFolders(appsWithTags, folders);
 
       // Save updated folders if we added any
       if (updatedFolders.length > folders.length) {
         saveFolders(updatedFolders);
       }
 
-      const newItems = mergeAppsAndFolders(apps, updatedFolders);
+      const newItems = mergeAppsAndFolders(appsWithTags, updatedFolders);
       setItems(newItems);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [apps, folders]);
+  }, [apps, folders, tagAssignments]);
+
+  // Fetch and apply system accent color
+  useEffect(() => {
+    async function fetchAccentColor() {
+      const { invoke } = await import("@tauri-apps/api/core");
+      try {
+        const color = await invoke<string>("get_system_accent_color");
+        document.documentElement.style.setProperty("--accent-color", color);
+      } catch (err) {
+        console.error("Failed to get system accent color:", err);
+        document.documentElement.style.setProperty("--accent-color", "#007aff");
+      }
+    }
+    fetchAccentColor();
+  }, []);
 
   // Reset to first page when searching
   useEffect(() => {
     setCurrentPage(0);
   }, [searchQuery]);
+
+  // Calculate available tags and their counts
+  useEffect(() => {
+    const tagMap = new Map<string, number>();
+
+    // Count tags from apps (not folders)
+    items.forEach((item) => {
+      if (!isFolder(item)) {
+        const app = item as App;
+        app.tags?.forEach((tagKey) => {
+          tagMap.set(tagKey, (tagMap.get(tagKey) || 0) + 1);
+        });
+      }
+    });
+
+    // Build tags array from predefined tags + custom tags
+    const allTagDefinitions = [
+      ...PREDEFINED_TAGS.map((pt) => ({
+        ...pt,
+        label: "", // Will use labelKey for translation
+        isCustom: false,
+        isDeletable: false,
+      })),
+      ...customTags.map((ct) => ({
+        key: ct.key,
+        label: ct.label,
+        labelKey: undefined,
+        icon: getIconByName(ct.iconName) || PREDEFINED_TAGS[0].icon,
+        iconName: ct.iconName,
+        isCustom: true,
+        isDeletable: true,
+      })),
+    ];
+
+    // Custom tags should always be shown (even with count 0) so users can tag apps
+    // Predefined tags only show if apps have them
+    const tags: Tag[] = allTagDefinitions
+      .filter((tag) => tag.isCustom || tagMap.has(tag.key))
+      .map((tag) => ({
+        ...tag,
+        count: tagMap.get(tag.key) || 0,
+      }))
+      .sort((a, b) => b.count - a.count);
+
+    setAvailableTags(tags);
+  }, [items, customTags]);
 
   // Close context menus on click outside
   useEffect(() => {
@@ -323,6 +490,7 @@ function App() {
   useEffect(() => {
     let unlistenHotCorner: (() => void) | undefined;
     let unlistenShortcut: (() => void) | undefined;
+    let unlistenAboutDialog: (() => void) | undefined;
 
     async function setupListeners() {
       const { getCurrentWindow } = await import("@tauri-apps/api/window");
@@ -350,6 +518,11 @@ function App() {
         }
       });
 
+      // About dialog trigger from menu
+      unlistenAboutDialog = await listen("show-about-dialog", () => {
+        setShowAboutDialog(true);
+      });
+
       // Register user's saved shortcut on startup
       try {
         await invoke("register_global_shortcut", {
@@ -365,12 +538,15 @@ function App() {
     return () => {
       if (unlistenHotCorner) unlistenHotCorner();
       if (unlistenShortcut) unlistenShortcut();
+      if (unlistenAboutDialog) unlistenAboutDialog();
     };
   }, [gridSettings.globalShortcut]);
 
   // Context menu handler
   function handleContextMenu(e: React.MouseEvent) {
     e.preventDefault();
+    // Don't show context menu if any modal is open
+    if (isAnyModalOpen) return;
     setContextMenu({ x: e.clientX, y: e.clientY });
   }
 
@@ -410,7 +586,7 @@ function App() {
       console.error("Failed to register global shortcut:", err);
     }
 
-    setShowGridSettings(false);
+    closeAllSettings();
   }
 
   // Sort all items alphabetically
@@ -423,18 +599,107 @@ function App() {
     setCurrentPage(0);
   }
 
-  // Hide app from Launchpad
-  function hideApp(bundleId: string) {
-    const newHidden = new Set(hiddenApps);
-    newHidden.add(bundleId);
-    setHiddenApps(newHidden);
-    localStorage.setItem("launchpad-hidden-apps", JSON.stringify(Array.from(newHidden)));
+  // Tag manipulation handlers
+  function handleToggleTag(bundleId: string, tagKey: string) {
+    // Update items state
+    setItems((prevItems) =>
+      prevItems.map((item) => {
+        if (!isFolder(item)) {
+          const app = item as App;
+          if (app.bundle_id === bundleId) {
+            const tags = app.tags || [];
+            const hasTag = tags.includes(tagKey);
+            return {
+              ...app,
+              tags: hasTag
+                ? tags.filter((t) => t !== tagKey)
+                : [...tags, tagKey],
+            };
+          }
+        }
+        return item;
+      }),
+    );
+
+    // Persist tag assignment to localStorage
+    setTagAssignments((prev) => {
+      const currentTags = prev[bundleId] || [];
+      const hasTag = currentTags.includes(tagKey);
+      const newTags = hasTag
+        ? currentTags.filter((t) => t !== tagKey)
+        : [...currentTags, tagKey];
+
+      const updated = { ...prev };
+      if (newTags.length > 0) {
+        updated[bundleId] = newTags;
+      } else {
+        delete updated[bundleId]; // Clean up empty entries
+      }
+
+      localStorage.setItem("launchpad-tag-assignments", JSON.stringify(updated));
+      return updated;
+    });
+  }
+
+  function handleCreateTag() {
+    setShowCreateTagModal(true);
+  }
+
+  function handleTagCreated(tagData: { key: string; label: string; iconName: string }) {
+    // Check if tag with same key already exists - update it instead of duplicating
+    const existingIndex = customTags.findIndex(t => t.key === tagData.key);
+    let updatedCustomTags: typeof customTags;
+
+    if (existingIndex >= 0) {
+      // Update existing tag (e.g., if user re-creates with different icon)
+      updatedCustomTags = [...customTags];
+      updatedCustomTags[existingIndex] = tagData;
+    } else {
+      // Add new tag
+      updatedCustomTags = [...customTags, tagData];
+    }
+
+    setCustomTags(updatedCustomTags);
+    localStorage.setItem("launchpad-custom-tags", JSON.stringify(updatedCustomTags));
+  }
+
+  function handleDeleteTag(tagKey: string) {
+    // Remove tag from custom tags
+    const updatedCustomTags = customTags.filter((t) => t.key !== tagKey);
+    setCustomTags(updatedCustomTags);
+    localStorage.setItem(
+      "launchpad-custom-tags",
+      JSON.stringify(updatedCustomTags),
+    );
+
+    // Remove tag from all apps
+    setItems((prevItems) =>
+      prevItems.map((item) => {
+        if (!isFolder(item)) {
+          const app = item as App;
+          if (app.tags?.includes(tagKey)) {
+            return {
+              ...app,
+              tags: app.tags.filter((t) => t !== tagKey),
+            };
+          }
+        }
+        return item;
+      }),
+    );
+
+    // Clear selected tag if it was the deleted one
+    if (selectedTag === tagKey) {
+      setSelectedTag(null);
+    }
   }
 
   // Handle app right-click
   function handleAppContextMenu(e: React.MouseEvent, app: any) {
     e.preventDefault();
     e.stopPropagation();
+    // Don't show context menu if any modal is open
+    if (isAnyModalOpen) return;
     setAppContextMenu({
       x: e.clientX,
       y: e.clientY,
@@ -471,6 +736,12 @@ function App() {
     }
   }
 
+  // Handle tag selection with page reset
+  function handleTagSelect(tagKey: string | null) {
+    setSelectedTag(tagKey);
+    setCurrentPage(0); // Reset to first page when changing tag filter
+  }
+
   return (
     <div className="launchpad" onContextMenu={handleContextMenu}>
       {/* Dragging Ghost Element */}
@@ -483,6 +754,16 @@ function App() {
 
       <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
 
+      {/* Tag Bar */}
+      {gridSettings.tagSettings.showTagBar && availableTags.length > 0 && (
+        <TagBar
+          tags={availableTags}
+          selectedTag={selectedTag}
+          onTagSelect={handleTagSelect}
+          totalAppsCount={items.filter((item) => !isFolder(item)).length}
+        />
+      )}
+
       {loading && (
         <div className="loading">
           <p>{t("common.loading")}</p>
@@ -492,7 +773,7 @@ function App() {
       {error && (
         <div className="error">
           <p>{error}</p>
-          <button onClick={loadApps}>{t("common.retry")}</button>
+          <Button onClick={loadApps}>{t("common.retry")}</Button>
         </div>
       )}
 
@@ -527,6 +808,7 @@ function App() {
                     }}
                     onMouseDown={(e) => {
                       if (e.button !== 0) return;
+                      e.preventDefault(); // Prevent native browser drag
                       const globalIndex = startIndex + index;
                       setMouseDownPos({ x: e.clientX, y: e.clientY });
                       setMouseDownItem({ index: globalIndex, item });
@@ -545,18 +827,29 @@ function App() {
                   />
                 );
               } else {
+                // Check if this is a folder join scenario (app being dragged over another app's icon)
+                // Use iconHoverIndex for precise icon detection instead of container hover
+                const actualItemIndex = items.findIndex(i =>
+                  !isFolder(i) && (i as App).bundle_id === item.bundle_id
+                );
+                const isFolderJoinTarget = iconHoverIndex === actualItemIndex &&
+                  draggedItem !== null &&
+                  !isFolder(draggedItem) &&
+                  !isFolder(item);
+
                 return (
                   <AppItem
                     key={item.bundle_id}
                     app={item}
                     isDragging={isDraggingThis}
                     isDragOver={isDragOverThis}
+                    isFolderJoinTarget={isFolderJoinTarget}
                     editMode={editMode}
                     onLaunch={launchApp}
-                    onRemove={hideApp}
                     onContextMenu={(e) => handleAppContextMenu(e, item)}
                     onMouseDown={(e) => {
                       if (e.button !== 0 || editMode) return;
+                      e.preventDefault(); // Prevent native browser drag
                       const globalIndex = startIndex + index;
                       setMouseDownPos({ x: e.clientX, y: e.clientY });
                       setMouseDownItem({ index: globalIndex, item });
@@ -620,7 +913,7 @@ function App() {
         <ContextMenu
           position={contextMenu}
           onCreateFolder={() => {
-            const currentItemCount = visibleItems.length;
+            const currentItemCount = items.length;
             createFolder();
             setContextMenu(null);
 
@@ -646,26 +939,108 @@ function App() {
               }
             }, 150);
           }}
-          onGridSettings={() => {
-            setShowGridSettings(true);
-            setContextMenu(null);
-          }}
           onSortAlphabetically={() => {
             sortAlphabetically();
             setContextMenu(null);
           }}
           onEditApps={toggleEditMode}
+          onResetTags={() => {
+            if (confirm("Reset all tags? This will clear all tag assignments and let you test auto-tagging.")) {
+              // Clear custom tags
+              setCustomTags([]);
+              localStorage.removeItem("launchpad-custom-tags");
+              // Clear tag assignments
+              setTagAssignments({});
+              localStorage.removeItem("launchpad-tag-assignments");
+
+              // Clear folders to remove old cached tags
+              localStorage.removeItem("launchpad-folders");
+              setFolders([]);
+
+              // Reload apps to get fresh auto-tags from Rust
+              loadApps();
+            }
+            setContextMenu(null);
+          }}
+          onLanguageSettings={() => {
+            setShowLanguageSettings(true);
+            setContextMenu(null);
+          }}
+          onGridLayoutSettings={() => {
+            setShowGridLayoutSettings(true);
+            setContextMenu(null);
+          }}
+          onHotCornersSettings={() => {
+            setShowHotCornersSettings(true);
+            setContextMenu(null);
+          }}
+          onKeyboardShortcutsSettings={() => {
+            setShowKeyboardShortcutsSettings(true);
+            setContextMenu(null);
+          }}
+          onCustomTagsSettings={() => {
+            setShowCustomTagsSettings(true);
+            setContextMenu(null);
+          }}
+          onAbout={() => {
+            setShowAboutDialog(true);
+            setContextMenu(null);
+          }}
           editMode={editMode}
         />
       )}
 
-      {/* Settings Modal */}
-      {showGridSettings && (
-        <Settings
+      {/* Settings Modals */}
+      {showLanguageSettings && (
+        <LanguageSettings onClose={() => setShowLanguageSettings(false)} />
+      )}
+
+      {showGridLayoutSettings && (
+        <GridLayoutSettings
           settings={gridSettings}
           onSettingsChange={setGridSettings}
           onSave={saveGridSettings}
-          onClose={() => setShowGridSettings(false)}
+          onClose={() => setShowGridLayoutSettings(false)}
+        />
+      )}
+
+      {showHotCornersSettings && (
+        <HotCornersSettings
+          settings={gridSettings}
+          onSettingsChange={setGridSettings}
+          onSave={saveGridSettings}
+          onClose={() => setShowHotCornersSettings(false)}
+        />
+      )}
+
+      {showKeyboardShortcutsSettings && (
+        <KeyboardShortcutsSettings
+          settings={gridSettings}
+          onSettingsChange={setGridSettings}
+          onSave={saveGridSettings}
+          onClose={() => setShowKeyboardShortcutsSettings(false)}
+        />
+      )}
+
+      {showCustomTagsSettings && (
+        <CustomTagsSettings
+          customTags={customTags}
+          onDeleteTag={handleDeleteTag}
+          onCreateTag={handleCreateTag}
+          onClose={() => setShowCustomTagsSettings(false)}
+        />
+      )}
+
+      {/* About Dialog */}
+      {showAboutDialog && (
+        <AboutDialog onClose={() => setShowAboutDialog(false)} />
+      )}
+
+      {/* Create Tag Modal */}
+      {showCreateTagModal && (
+        <CreateTagModal
+          onClose={() => setShowCreateTagModal(false)}
+          onCreateTag={handleTagCreated}
         />
       )}
 
@@ -682,17 +1057,25 @@ function App() {
       )}
 
       {/* App Context Menu */}
-      {appContextMenu && (
-        <AppContextMenu
-          position={{ x: appContextMenu.x, y: appContextMenu.y }}
-          appName={appContextMenu.appName}
-          onOpen={() => launchApp(appContextMenu.appPath)}
-          onRevealInFinder={() => revealInFinder(appContextMenu.appPath)}
-          onMoveToTrash={() => confirmMoveToTrash(appContextMenu.appName, appContextMenu.appPath)}
-          onHideFromLaunchpad={() => hideApp(appContextMenu.bundleId)}
-          onClose={() => setAppContextMenu(null)}
-        />
-      )}
+      {appContextMenu && (() => {
+        const app = items.find(item => !isFolder(item) && (item as App).bundle_id === appContextMenu.bundleId) as App | undefined;
+        const appTags = app?.tags || [];
+
+        return (
+          <AppContextMenu
+            position={{ x: appContextMenu.x, y: appContextMenu.y }}
+            appName={appContextMenu.appName}
+            appTags={appTags}
+            availableTags={availableTags}
+            onOpen={() => launchApp(appContextMenu.appPath)}
+            onRevealInFinder={() => revealInFinder(appContextMenu.appPath)}
+            onMoveToTrash={() => confirmMoveToTrash(appContextMenu.appName, appContextMenu.appPath)}
+            onToggleTag={(tagKey) => handleToggleTag(appContextMenu.bundleId, tagKey)}
+            onCreateTag={handleCreateTag}
+            onClose={() => setAppContextMenu(null)}
+          />
+        );
+      })()}
 
       {/* Trash Confirmation Modal */}
       {trashConfirmation && (

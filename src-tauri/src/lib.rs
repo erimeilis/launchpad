@@ -17,6 +17,7 @@ struct App {
     path: String,
     icon: Option<String>,          // Base64 encoded icon
     source_folder: Option<String>, // Track where the app came from
+    tags: Vec<String>,             // Auto-detected category tags
 }
 
 #[tauri::command]
@@ -79,7 +80,65 @@ fn scan_applications_directory(
 }
 
 fn parse_app_bundle(app_path: &Path, source_folder: Option<&str>) -> Option<App> {
-    let info_plist_path = app_path.join("Contents/Info.plist");
+    // Try standard macOS Info.plist location first
+    let mut info_plist_path = app_path.join("Contents/Info.plist");
+    let mut actual_app_path = app_path.to_path_buf();
+
+    // Check for wrapped iOS apps (Mac App Store ports)
+    // These have structure: App.app/Wrapper/InnerApp.app/Info.plist (iOS style - no Contents folder)
+    // or App.app/WrappedBundle -> Wrapper/InnerApp.app (symlink)
+    if !info_plist_path.exists() {
+        // Check for WrappedBundle symlink
+        let wrapped_bundle_link = app_path.join("WrappedBundle");
+
+        if wrapped_bundle_link.is_symlink() || wrapped_bundle_link.exists() {
+            // Resolve the symlink and check for Info.plist
+            if let Ok(resolved) = fs::read_link(&wrapped_bundle_link) {
+                let inner_app = app_path.join(&resolved);
+
+                // Try macOS style first (Contents/Info.plist)
+                let inner_plist_macos = inner_app.join("Contents/Info.plist");
+                // Then try iOS style (Info.plist at root)
+                let inner_plist_ios = inner_app.join("Info.plist");
+
+                if inner_plist_macos.exists() {
+                    info_plist_path = inner_plist_macos;
+                    actual_app_path = inner_app;
+                } else if inner_plist_ios.exists() {
+                    info_plist_path = inner_plist_ios;
+                    actual_app_path = inner_app.clone();
+                }
+            }
+        }
+
+        // If still not found, scan Wrapper directory for .app bundles
+        if !info_plist_path.exists() {
+            let wrapper_dir = app_path.join("Wrapper");
+            if wrapper_dir.is_dir() {
+                if let Ok(entries) = fs::read_dir(&wrapper_dir) {
+                    for entry in entries.flatten() {
+                        let entry_path = entry.path();
+                        if entry_path.extension().and_then(|s| s.to_str()) == Some("app") {
+                            // Try macOS style first
+                            let inner_plist_macos = entry_path.join("Contents/Info.plist");
+                            // Then try iOS style
+                            let inner_plist_ios = entry_path.join("Info.plist");
+
+                            if inner_plist_macos.exists() {
+                                info_plist_path = inner_plist_macos;
+                                actual_app_path = entry_path;
+                                break;
+                            } else if inner_plist_ios.exists() {
+                                info_plist_path = inner_plist_ios;
+                                actual_app_path = entry_path;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     if !info_plist_path.exists() {
         return None;
@@ -102,44 +161,391 @@ fn parse_app_bundle(app_path: &Path, source_folder: Option<&str>) -> Option<App>
         .map(|s| s.to_string())
         .unwrap_or_else(|| String::from("unknown"));
 
-    // Get app icon
-    let icon = extract_app_icon(app_path, plist_dict);
+    // Get app icon (use actual_app_path for wrapped apps since icon is in inner bundle)
+    let icon = extract_app_icon(&actual_app_path, plist_dict);
+
+    // Detect tags from app category
+    let tags = detect_app_tags(plist_dict, &bundle_id, &name);
 
     Some(App {
         name,
         bundle_id,
-        path: app_path.to_string_lossy().to_string(),
+        path: app_path.to_string_lossy().to_string(), // Use outer app path for launching
         icon,
         source_folder: source_folder.map(|s| s.to_string()),
+        tags,
     })
 }
 
-fn extract_app_icon(app_path: &Path, plist_dict: &plist::Dictionary) -> Option<String> {
-    // Get icon file name from plist
-    let icon_file = plist_dict
-        .get("CFBundleIconFile")
-        .and_then(|v| v.as_string())?;
+fn detect_app_tags(plist_dict: &plist::Dictionary, bundle_id: &str, name: &str) -> Vec<String> {
+    let mut tags = Vec::new();
 
-    // Try different icon paths
-    let resources_path = app_path.join("Contents/Resources");
-    let mut icon_path = resources_path.join(icon_file);
-
-    // Add .icns extension if not present
-    if icon_path.extension().is_none() {
-        icon_path.set_extension("icns");
+    // Priority 1: Bundle ID pattern matching (most specific - catches browsers, etc.)
+    if let Some(tag) = detect_tag_from_bundle_id(bundle_id) {
+        tags.push(tag.to_string());
+        return tags;
     }
 
-    if !icon_path.exists() {
+    // Priority 2: Well-known apps database (specific app names)
+    if let Some(tag) = detect_tag_from_app_name(name, bundle_id) {
+        tags.push(tag.to_string());
+        // println!("✅ Tag detected via app_name: {} (bundle: {}) → {}", name, bundle_id, tag);
+        return tags;
+    }
+
+    // Priority 3: LSApplicationCategoryType from macOS (fallback for general categorization)
+    if let Some(category) = plist_dict
+        .get("LSApplicationCategoryType")
+        .and_then(|v| v.as_string())
+    {
+        if let Some(tag) = map_macos_category_to_tag(category) {
+            tags.push(tag.to_string());
+            return tags;
+        }
+    }
+
+    // Debug: Log apps with no tags
+    // if tags.is_empty() {
+    //     println!("❌ NO TAG: {} | bundle_id: {}", name, bundle_id);
+    // }
+
+    tags // May be empty if no category detected
+}
+
+fn map_macos_category_to_tag(category: &str) -> Option<&'static str> {
+    match category {
+        // Dev Tools
+        "public.app-category.developer-tools" => Some("dev-tools"),
+
+        // Social
+        "public.app-category.social-networking" => Some("social"),
+
+        // Utilities
+        "public.app-category.utilities" => Some("utilities"),
+
+        // Entertainment (games, music, video)
+        "public.app-category.entertainment" => Some("entertainment"),
+        "public.app-category.games" => Some("entertainment"),
+        "public.app-category.music" => Some("entertainment"),
+        "public.app-category.video" => Some("entertainment"),
+
+        // Creativity (graphics, design, photography)
+        "public.app-category.graphics-design" => Some("creativity"),
+        "public.app-category.photography" => Some("creativity"),
+
+        // Planning (productivity, business, finance)
+        "public.app-category.productivity" => Some("planning"),
+        "public.app-category.business" => Some("planning"),
+        "public.app-category.finance" => Some("planning"),
+
+        // Office (education, reference)
+        "public.app-category.education" => Some("office"),
+        "public.app-category.reference" => Some("office"),
+
+        _ => None,
+    }
+}
+
+fn detect_tag_from_bundle_id(bundle_id: &str) -> Option<&'static str> {
+    let bundle_lower = bundle_id.to_lowercase();
+
+    // Exclude Chrome/Edge PWAs (Progressive Web Apps) - these are NOT browsers
+    if bundle_lower.contains(".chrome.app.") || bundle_lower.contains(".edge.app.") {
+        return None; // Let other detection methods handle PWAs
+    }
+
+    // Browsers - Use specific patterns to avoid false matches
+    // Check for exact domain segments (e.g., "org.mozilla.firefox")
+    if bundle_lower.contains(".safari") || bundle_lower.contains("safari.") {
+        // println!("✅ Browser detected via bundle_id: {} → browsers", bundle_id);
+        return Some("browsers");
+    }
+    if bundle_lower.contains(".chrome") || bundle_lower.contains("chrome.") || bundle_lower == "com.google.chrome" {
+        // println!("✅ Browser detected via bundle_id: {} → browsers", bundle_id);
+        return Some("browsers");
+    }
+    if bundle_lower.contains(".firefox") || bundle_lower.contains("mozilla.") {
+        // println!("✅ Browser detected via bundle_id: {} → browsers", bundle_id);
+        return Some("browsers");
+    }
+    if bundle_lower.contains("torbrowser") || bundle_lower.contains("torproject") {
+        // println!("✅ Browser detected via bundle_id: {} → browsers", bundle_id);
+        return Some("browsers");
+    }
+    if bundle_lower.contains(".brave") || bundle_lower.contains("brave.") {
+        // println!("✅ Browser detected via bundle_id: {} → browsers", bundle_id);
+        return Some("browsers");
+    }
+    if bundle_lower.contains(".opera") || bundle_lower.contains("opera.") {
+        // println!("✅ Browser detected via bundle_id: {} → browsers", bundle_id);
+        return Some("browsers");
+    }
+    if bundle_lower.contains(".vivaldi") {
+        // println!("✅ Browser detected via bundle_id: {} → browsers", bundle_id);
+        return Some("browsers");
+    }
+    if bundle_lower.contains(".edge") || bundle_lower.contains("microsoftedge") {
+        // println!("✅ Browser detected via bundle_id: {} → browsers", bundle_id);
+        return Some("browsers");
+    }
+    if bundle_lower.contains("dolphin.anty") || bundle_lower.contains("dolphinanty") {
+        // println!("✅ Browser detected via bundle_id: {} → browsers", bundle_id);
+        return Some("browsers");
+    }
+    if bundle_lower.contains(".arc") || bundle_lower == "company.thebrowser.browser" {
+        // println!("✅ Browser detected via bundle_id: {} → browsers", bundle_id);
+        return Some("browsers");
+    }
+    if bundle_lower.contains("waterfox") || bundle_lower.contains("palemoon")
+        || bundle_lower.contains("floorp") || bundle_lower.contains("librewolf") {
+        // println!("✅ Browser detected via bundle_id: {} → browsers", bundle_id);
+        return Some("browsers");
+    }
+
+    // Office - productivity suites and document apps
+    const OFFICE: &[&str] = &[
+        "google.docs", "google.sheets", "google.slides", "google.gmail",
+        "microsoft.word", "microsoft.excel", "microsoft.powerpoint", "microsoft.outlook",
+        "libreoffice", "openoffice", "pages", "numbers", "keynote",
+        "notion", "obsidian", "evernote", "onenote", "bear", "ulysses",
+        "writer", "calc", "impress", "airtable", "coda"
+    ];
+    if OFFICE.iter().any(|&app| bundle_lower.contains(app)) {
+        return Some("office");
+    }
+
+    // Utilities - system tools and utilities
+    const UTILITIES: &[&str] = &[
+        "colorsync", "colormeter", "rectangle", "magnet", "bettertouchtool",
+        "alfred", "raycast", "spotlight", "cleanmymac", "appcleaner",
+        "utm", "virtualbox", "parallels", "diskspeed", "diskutility",
+        " 1password", "bitwarden", "lastpass", "keepass", "dashlane",
+        "bartender", "hazel", "keyboard maestro", "textexpander", "paste",
+        "dropzone", "popclip", "clipy", "maccy", "flux", "nightshift"
+    ];
+    if UTILITIES.iter().any(|&app| bundle_lower.contains(app)) {
+        return Some("utilities");
+    }
+
+    // Social - communication and social media
+    const SOCIAL: &[&str] = &[
+        "slack", "discord", "telegram", "whatsapp", "messenger", "signal",
+        "zoom", "teams", "skype", "facetime", "meet", "webex",
+        "twitter", "tweetbot", "mastodon", "bluesky", "threads",
+        "instagram", "facebook", "linkedin", "tiktok", "snapchat",
+        "element", "matrix", "irc", "gitter", "rocketchat"
+    ];
+    if SOCIAL.iter().any(|&app| bundle_lower.contains(app)) {
+        return Some("social");
+    }
+
+    // Dev Tools - programming and development
+    const DEV_TOOLS: &[&str] = &[
+        "xcode", "vscode", "code", "jetbrains", "intellij", "pycharm", "webstorm",
+        "github", "terminal", "iterm", "warp", "alacritty", "kitty",
+        "docker", "postman", "insomnia", "paw", "rapidapi",
+        "vim", "neovim", "macvim", "emacs", "sublime", "atom",
+        "sourcetree", "tower", "gitkraken", "fork", "gitup",
+        "dash", "devdocs", "sequel", "tableplus", "postico", "dbeaver",
+        "simulator", "charles", "proxyman", "wireshark"
+    ];
+    if DEV_TOOLS.iter().any(|&app| bundle_lower.contains(app)) {
+        return Some("dev-tools");
+    }
+
+    // Creativity - design, photo, video editing
+    const CREATIVITY: &[&str] = &[
+        "photoshop", "illustrator", "indesign", "aftereffects", "premiere",
+        "lightroom", "bridge", "xd", "dimension", "fresco", "adobe",
+        "sketch", "figma", "affinity", "pixelmator", "acorn",
+        "inkscape", "gimp", "krita", "blender", "cinema4d",
+        "final cut", "davinci", "lumafusion", "compressor", "motion",
+        "logic", "garageband", "ableton", "fl studio", "audacity",
+        "procreate", "clip studio", "rebelle", "corel", "canva"
+    ];
+    if CREATIVITY.iter().any(|&app| bundle_lower.contains(app)) {
+        return Some("creativity");
+    }
+
+    // Entertainment - media, games, streaming
+    const ENTERTAINMENT: &[&str] = &[
+        "spotify", "music", "itunes", "tidal", "deezer", "soundcloud",
+        "vlc", "iina", "quicktime", "plex", "kodi", "infuse",
+        "netflix", "youtube", "prime video", "disney", "hulu", "hbo",
+        "steam", "epic", "gog", "origin", "uplay", "battlenet",
+        "game", "minecraft", "league of legends", "fortnite", "valorant",
+        "twitch", "obs", "streamlabs", "discord", "parsec"
+    ];
+    if ENTERTAINMENT.iter().any(|&app| bundle_lower.contains(app)) {
+        return Some("entertainment");
+    }
+
+    // Planning - calendars, notes, task management
+    const PLANNING: &[&str] = &[
+        "calendar", "fantastical", "busycal", "cron", "morgen",
+        "reminders", "todoist", "things", "omnifocus", "taskpaper",
+        "notes", "agenda", "craft", "roam", "logseq",
+        "trello", "asana", "monday", "clickup", "linear",
+        "timery", "toggl", "rescuetime", "timeular", "clockify"
+    ];
+    if PLANNING.iter().any(|&app| bundle_lower.contains(app)) {
+        return Some("planning");
+    }
+
+    None
+}
+
+fn detect_tag_from_app_name(name: &str, _bundle_id: &str) -> Option<&'static str> {
+    let name_lower = name.to_lowercase();
+
+    // Browsers
+    const BROWSER_NAMES: &[&str] = &[
+        "safari", "chrome", "firefox", "edge", "brave", "tor browser",
+        "opera", "arc", "orion", "vivaldi"
+    ];
+    if BROWSER_NAMES.iter().any(|&n| name_lower.contains(n)) {
+        return Some("browsers");
+    }
+
+    // Office apps
+    const OFFICE_NAMES: &[&str] = &[
+        "google docs", "google sheets", "google slides", "gmail", "google drive",
+        "microsoft word", "microsoft excel", "microsoft powerpoint", "outlook",
+        "pages", "numbers", "keynote", "libreoffice", "notion"
+    ];
+    if OFFICE_NAMES.iter().any(|&n| name_lower.contains(n)) {
+        return Some("office");
+    }
+
+    // Utilities
+    const UTILITY_NAMES: &[&str] = &[
+        "utility", "activity monitor", "console", "disk utility", "finder",
+        "system preferences", "system settings", "terminal", "calculator"
+    ];
+    if UTILITY_NAMES.iter().any(|&n| name_lower.contains(n)) {
+        return Some("utilities");
+    }
+
+    // Social
+    const SOCIAL_NAMES: &[&str] = &[
+        "mail", "facetime", "messages", "slack", "discord", "zoom"
+    ];
+    if SOCIAL_NAMES.iter().any(|&n| name_lower.contains(n)) {
+        return Some("social");
+    }
+
+    // Planning
+    const PLANNING_NAMES: &[&str] = &[
+        "calendar", "reminders", "notes", "todoist", "things"
+    ];
+    if PLANNING_NAMES.iter().any(|&n| name_lower.contains(n)) {
+        return Some("planning");
+    }
+
+    // Creativity
+    const CREATIVITY_NAMES: &[&str] = &[
+        "photos", "photoshop", "illustrator", "sketch", "figma",
+        "final cut", "logic pro"
+    ];
+    if CREATIVITY_NAMES.iter().any(|&n| name_lower.contains(n)) {
+        return Some("creativity");
+    }
+
+    None
+}
+
+fn extract_app_icon(app_path: &Path, plist_dict: &plist::Dictionary) -> Option<String> {
+    // Try macOS style first: Contents/Resources/*.icns
+    if let Some(icon_file) = plist_dict
+        .get("CFBundleIconFile")
+        .and_then(|v| v.as_string())
+    {
+        let resources_path = app_path.join("Contents/Resources");
+        let mut icon_path = resources_path.join(icon_file);
+
+        // Add .icns extension if not present
+        if icon_path.extension().is_none() {
+            icon_path.set_extension("icns");
+        }
+
+        if icon_path.exists() {
+            return extract_icns_as_base64(&icon_path);
+        }
+
         // Try without extension
         icon_path = resources_path.join(icon_file);
+        if icon_path.exists() {
+            return extract_icns_as_base64(&icon_path);
+        }
     }
 
-    if !icon_path.exists() {
-        return None;
+    // Try iOS style: PNG icons at app root
+    // iOS apps use CFBundleIcons -> CFBundlePrimaryIcon -> CFBundleIconFiles
+    if let Some(icons_dict) = plist_dict.get("CFBundleIcons").and_then(|v| v.as_dictionary()) {
+        if let Some(primary_icon) = icons_dict.get("CFBundlePrimaryIcon").and_then(|v| v.as_dictionary()) {
+            if let Some(icon_files) = primary_icon.get("CFBundleIconFiles").and_then(|v| v.as_array()) {
+                // Get the icon base name (e.g., "AppIcon60x60")
+                for icon_value in icon_files {
+                    if let Some(icon_base) = icon_value.as_string() {
+                        // Try common iOS icon patterns
+                        let patterns = [
+                            format!("{}@3x.png", icon_base),
+                            format!("{}@2x.png", icon_base),
+                            format!("{}.png", icon_base),
+                        ];
+
+                        for pattern in &patterns {
+                            let icon_path = app_path.join(pattern);
+                            if icon_path.exists() {
+                                return extract_png_as_base64(&icon_path);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Also try CFBundleIconName if CFBundleIconFiles didn't work
+            if let Some(icon_name) = primary_icon.get("CFBundleIconName").and_then(|v| v.as_string()) {
+                // Search for any PNG starting with this name
+                if let Ok(entries) = fs::read_dir(app_path) {
+                    let mut best_icon: Option<std::path::PathBuf> = None;
+                    let mut best_size = 0;
+
+                    for entry in entries.flatten() {
+                        let path = entry.path();
+                        if let Some(filename) = path.file_name().and_then(|n| n.to_str()) {
+                            if filename.starts_with(icon_name) && filename.ends_with(".png") {
+                                // Prefer @2x or @3x versions for better quality
+                                let size = if filename.contains("@3x") {
+                                    3
+                                } else if filename.contains("@2x") {
+                                    2
+                                } else {
+                                    1
+                                };
+                                if size > best_size {
+                                    best_size = size;
+                                    best_icon = Some(path);
+                                }
+                            }
+                        }
+                    }
+
+                    if let Some(icon_path) = best_icon {
+                        return extract_png_as_base64(&icon_path);
+                    }
+                }
+            }
+        }
     }
 
-    // Read and encode icon as base64 PNG
-    extract_icns_as_base64(&icon_path)
+    None
+}
+
+fn extract_png_as_base64(png_path: &Path) -> Option<String> {
+    let png_data = fs::read(png_path).ok()?;
+    let encoded = base64::Engine::encode(&base64::engine::general_purpose::STANDARD, &png_data);
+    Some(format!("data:image/png;base64,{}", encoded))
 }
 
 fn extract_icns_as_base64(icon_path: &Path) -> Option<String> {
@@ -366,6 +772,7 @@ fn register_global_shortcut(app: tauri::AppHandle, shortcut: String) -> Result<(
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     use tauri_plugin_global_shortcut::Builder as ShortcutBuilder;
+    use tauri::menu::{Menu, MenuItemBuilder, PredefinedMenuItem};
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
@@ -378,6 +785,31 @@ pub fn run() {
                 let _ = window.unminimize();
             }
         }))
+        .menu(|app| {
+            // Create custom menu with About item that emits event
+            let about_item = MenuItemBuilder::with_id("about", "About Launchpad")
+                .build(app)?;
+            let quit_item = PredefinedMenuItem::quit(app, Some("Quit Launchpad"))?;
+
+            let app_submenu = tauri::menu::SubmenuBuilder::new(app, "Launchpad")
+                .item(&about_item)
+                .separator()
+                .item(&quit_item)
+                .build()?;
+
+            let menu = Menu::with_items(app, &[
+                &app_submenu,
+            ])?;
+
+            Ok(menu)
+        })
+        .on_menu_event(|app, event| {
+            if event.id() == "about" {
+                if let Some(window) = app.get_webview_window("main") {
+                    let _ = window.emit("show-about-dialog", ());
+                }
+            }
+        })
         .invoke_handler(tauri::generate_handler![
             get_installed_apps,
             launch_app,

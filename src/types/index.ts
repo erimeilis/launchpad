@@ -2,6 +2,8 @@
  * Type definitions for Launchpad application
  */
 
+import type { Icon } from "@phosphor-icons/react";
+
 /**
  * Represents a macOS application
  */
@@ -11,6 +13,7 @@ export interface App {
   path: string;
   icon: string | null;
   source_folder?: string;
+  tags: string[]; // Auto-detected category tags
 }
 
 /**
@@ -28,6 +31,38 @@ export interface Folder {
 export type LaunchpadItem = App | Folder;
 
 /**
+ * Represents a tag for categorizing apps
+ */
+export interface Tag {
+  key: string;
+  label: string;
+  labelKey?: string;
+  icon: Icon;
+  iconName: string;
+  count: number;
+  isCustom: boolean;
+  isDeletable: boolean;
+}
+
+/**
+ * Definition for a custom user-created tag
+ */
+export interface CustomTagDefinition {
+  key: string;
+  label: string;
+  iconName: string;
+}
+
+/**
+ * Settings for tag functionality
+ */
+export interface TagSettings {
+  showTagBar: boolean;
+  autoTagNewApps: boolean;
+  customTags: CustomTagDefinition[];
+}
+
+/**
  * Grid settings configuration
  */
 export interface GridSettings {
@@ -39,6 +74,7 @@ export interface GridSettings {
   hotCornerThreshold: number;
   hotCornerDebounce: number;
   globalShortcut: string;
+  tagSettings: TagSettings;
 }
 
 /**

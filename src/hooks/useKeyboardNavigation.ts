@@ -7,8 +7,8 @@ interface UseKeyboardNavigationProps {
   appsPerPage: number;
   setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
   searchQuery: string;
-  showGridSettings: boolean;
-  setShowGridSettings: (show: boolean) => void;
+  isAnySettingsOpen: boolean;
+  closeAllSettings: () => void;
   openFolder: unknown;
   setOpenFolder: (folder: null) => void;
   deleteConfirmation: DeleteConfirmationState | null;
@@ -30,8 +30,8 @@ export function useKeyboardNavigation({
   appsPerPage,
   setCurrentPage,
   searchQuery,
-  showGridSettings,
-  setShowGridSettings,
+  isAnySettingsOpen,
+  closeAllSettings,
   openFolder,
   setOpenFolder,
   deleteConfirmation,
@@ -57,8 +57,8 @@ export function useKeyboardNavigation({
           setDeleteConfirmation(null);
           return;
         }
-        if (showGridSettings) {
-          setShowGridSettings(false);
+        if (isAnySettingsOpen) {
+          closeAllSettings();
           return;
         }
         if (openFolder) {
@@ -105,14 +105,14 @@ export function useKeyboardNavigation({
   }, [
     filteredItemsLength,
     appsPerPage,
-    showGridSettings,
+    isAnySettingsOpen,
     openFolder,
     deleteConfirmation,
     editMode,
     trashConfirmation,
     appContextMenu,
     setCurrentPage,
-    setShowGridSettings,
+    closeAllSettings,
     setOpenFolder,
     setDeleteConfirmation,
     setEditMode,
@@ -127,7 +127,7 @@ export function useKeyboardNavigation({
 
     const handleWheel = (e: WheelEvent) => {
       if (searchQuery) return;
-      if (showGridSettings || openFolder) return;
+      if (isAnySettingsOpen || openFolder) return;
 
       const pages = Math.ceil(filteredItemsLength / appsPerPage);
       if (pages <= 1) return;
@@ -157,5 +157,5 @@ export function useKeyboardNavigation({
 
     window.addEventListener("wheel", handleWheel);
     return () => window.removeEventListener("wheel", handleWheel);
-  }, [filteredItemsLength, appsPerPage, searchQuery, showGridSettings, openFolder, setCurrentPage]);
+  }, [filteredItemsLength, appsPerPage, searchQuery, isAnySettingsOpen, openFolder, setCurrentPage]);
 }

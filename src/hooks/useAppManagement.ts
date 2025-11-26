@@ -57,13 +57,29 @@ export function useAppManagement() {
 
   /**
    * Merge apps and folders into a unified items array
+   * This function syncs folder apps with fresh app data to ensure tags are up-to-date
    */
   function mergeAppsAndFolders(apps: App[], folders: Folder[]): LaunchpadItem[] {
     if (apps.length === 0) return [];
 
-    const folderAppIds = new Set(folders.flatMap((f) => f.apps.map((a) => a.bundle_id)));
+    // Create a map of bundle_id to fresh app data for quick lookup
+    const appMap = new Map(apps.map((app) => [app.bundle_id, app]));
+
+    // Update folders with fresh app data (to sync tags and other properties)
+    const updatedFolders = folders.map((folder) => ({
+      ...folder,
+      apps: folder.apps
+        .map((folderApp) => {
+          // Use fresh app data if available, otherwise keep existing
+          const freshApp = appMap.get(folderApp.bundle_id);
+          return freshApp || folderApp;
+        })
+        .filter((app) => appMap.has(app.bundle_id)), // Remove apps that no longer exist
+    }));
+
+    const folderAppIds = new Set(updatedFolders.flatMap((f) => f.apps.map((a) => a.bundle_id)));
     const standaloneApps = apps.filter((app) => !folderAppIds.has(app.bundle_id));
-    const newItems: LaunchpadItem[] = [...standaloneApps, ...folders];
+    const newItems: LaunchpadItem[] = [...standaloneApps, ...updatedFolders];
 
     // Load custom item order from localStorage
     const savedOrder = localStorage.getItem("launchpad-item-order");

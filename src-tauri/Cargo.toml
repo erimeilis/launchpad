@@ -1,8 +1,11 @@
 [package]
 name = "launchpad"
-version = "0.4.0"
-description = "A Tauri App"
-authors = ["you"]
+version = "0.7.0"
+description = "macOS Launchpad recreation - Full-screen app launcher with folders and custom organization"
+authors = ["Launchpad Contributors"]
+license = "MIT"
+repository = "https://github.com/erimeilis/launchpad"
+homepage = "https://github.com/erimeilis/launchpad"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

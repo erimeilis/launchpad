@@ -2,6 +2,7 @@
   "common": {
     "save": "保存",
     "cancel": "キャンセル",
+    "done": "完了",
     "loading": "アプリケーションを読み込んでいます...",
     "retry": "再試行",
     "appsPerPage": "ページあたりのアプリ数：{{count}}"
@@ -15,13 +16,23 @@
     "sortAlphabetically": "アルファベット順に並べ替え",
     "editApps": "アプリを編集",
     "doneEditing": "編集を終了",
-    "settings": "設定"
+    "language": "言語",
+    "gridLayout": "グリッドレイアウト",
+    "hotCorners": "ホットコーナー",
+    "keyboardShortcuts": "キーボードショートカット",
+    "customTags": "カスタムタグ",
+    "resetAllTags": "すべてのタグをリセット（開発用）",
+    "about": "Launchpadについて"
   },
   "appContextMenu": {
     "open": "開く",
     "revealInFinder": "Finderで表示",
     "moveToTrash": "ゴミ箱に入れる",
-    "hideFromLaunchpad": "Launchpadから隠す"
+    "hideFromLaunchpad": "Launchpadから隠す",
+    "manageTags": "タグを管理",
+    "createNewTag": "新しいタグを作成",
+    "deleteTag": "タグを削除",
+    "deleteTagConfirm": "タグ「{{tagName}}」を削除しますか？"
   },
   "settings": {
     "title": "設定",
@@ -61,19 +72,35 @@
       "openLaunchpad": "Launchpadを開く",
       "examplesLabel": "例：F4、CommandOrControl+スペース、Alt+L",
       "modifiersLabel": "修飾キー：Cmd/CommandOrControl、Alt/Option、Shift、Ctrl"
+    },
+    "tags": {
+      "title": "カスタムタグ",
+      "noCustomTags": "カスタムタグはまだ作成されていません",
+      "createNew": "新しいタグを作成"
     }
   },
   "folder": {
     "defaultName": "フォルダ",
     "newFolderName": "新しいフォルダ",
     "delete": "フォルダを削除",
-    "deleteConfirm": "フォルダ「{{name}}」を削除しますか？",
-    "deleteMessage": "中のアプリはメイングリッドに移動されます。"
+    "deleteTitle": "フォルダ「{{folderName}}」を削除しますか？",
+    "deleteMessage": "アプリはメイングリッドに移動されます。",
+    "deleteFolder": "フォルダを削除"
   },
   "trash": {
-    "title": "ゴミ箱に入れますか？",
-    "message": "「{{appName}}」をゴミ箱に入れてもよろしいですか？",
-    "confirm": "ゴミ箱に入れる",
-    "cancel": "キャンセル"
+    "confirmTitle": "「{{appName}}」をゴミ箱に入れますか？",
+    "confirmMessage": "アプリケーションをゴミ箱に移動します。必要に応じてゴミ箱から復元できます。",
+    "moveToTrash": "ゴミ箱に入れる"
+  },
+  "tags": {
+    "all": "すべて",
+    "devTools": "開発ツール",
+    "social": "ソーシャル",
+    "browsers": "ブラウザ",
+    "utilities": "ユーティリティ",
+    "entertainment": "エンターテインメント",
+    "creativity": "クリエイティブ",
+    "planning": "計画",
+    "office": "オフィス"
   }
 }

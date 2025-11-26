@@ -2,6 +2,7 @@
   "common": {
     "save": "Save",
     "cancel": "Cancel",
+    "done": "Done",
     "loading": "Loading applications...",
     "retry": "Retry",
     "appsPerPage": "Apps per page: {{count}}"
@@ -15,13 +16,23 @@
     "sortAlphabetically": "Sort Alphabetically",
     "editApps": "Edit Apps",
     "doneEditing": "Done Editing",
-    "settings": "Settings"
+    "language": "Language",
+    "gridLayout": "Grid Layout",
+    "hotCorners": "Hot Corners",
+    "keyboardShortcuts": "Keyboard Shortcuts",
+    "customTags": "Custom Tags",
+    "resetAllTags": "Reset All Tags (Dev)",
+    "about": "About Launchpad"
   },
   "appContextMenu": {
     "open": "Open",
     "revealInFinder": "Reveal in Finder",
     "moveToTrash": "Move to Trash",
-    "hideFromLaunchpad": "Hide from Launchpad"
+    "hideFromLaunchpad": "Hide from Launchpad",
+    "manageTags": "Manage Tags",
+    "createNewTag": "Create New Tag",
+    "deleteTag": "Delete Tag",
+    "deleteTagConfirm": "Delete tag \"{{tagName}}\"?"
   },
   "settings": {
     "title": "Settings",
@@ -61,19 +72,43 @@
       "openLaunchpad": "Open Launchpad",
       "examplesLabel": "Examples: F4, CommandOrControl+Space, Alt+L",
       "modifiersLabel": "Modifiers: Cmd/CommandOrControl, Alt/Option, Shift, Ctrl"
+    },
+    "tags": {
+      "title": "Custom Tags",
+      "noCustomTags": "No custom tags created yet",
+      "createNew": "Create New Tag"
     }
   },
   "folder": {
     "defaultName": "Folder",
     "newFolderName": "New Folder",
     "delete": "Delete Folder",
-    "deleteConfirm": "Delete folder \"{{name}}\"?",
-    "deleteMessage": "Apps inside will be moved to the main grid."
+    "deleteTitle": "Delete folder \"{{folderName}}\"?",
+    "deleteMessage": "Apps will be moved back to the main grid.",
+    "deleteFolder": "Delete Folder"
   },
   "trash": {
-    "title": "Move to Trash?",
-    "message": "Are you sure you want to move \"{{appName}}\" to the Trash?",
-    "confirm": "Move to Trash",
-    "cancel": "Cancel"
+    "confirmTitle": "Move \"{{appName}}\" to Trash?",
+    "confirmMessage": "This will move the application to Trash. You can recover it from Trash if needed.",
+    "moveToTrash": "Move to Trash"
+  },
+  "createTag": {
+    "title": "Create Custom Tag",
+    "nameLabel": "Tag Name",
+    "namePlaceholder": "Enter tag name...",
+    "iconLabel": "Icon",
+    "cancel": "Cancel",
+    "create": "Create Tag"
+  },
+  "tags": {
+    "all": "All",
+    "devTools": "Dev Tools",
+    "social": "Social",
+    "browsers": "Browsers",
+    "utilities": "Utilities",
+    "entertainment": "Entertainment",
+    "creativity": "Creativity",
+    "planning": "Planning",
+    "office": "Office"
   }
 }

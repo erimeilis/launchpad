@@ -2,6 +2,7 @@
   "common": {
     "save": "Зберегти",
     "cancel": "Скасувати",
+    "done": "Готово",
     "loading": "Завантаження програм...",
     "retry": "Повторити",
     "appsPerPage": "Програм на сторінці: {{count}}"
@@ -15,13 +16,23 @@
     "sortAlphabetically": "Сортувати за Алфавітом",
     "editApps": "Редагувати Програми",
     "doneEditing": "Завершити Редагування",
-    "settings": "Налаштування"
+    "language": "Мова",
+    "gridLayout": "Макет Сітки",
+    "hotCorners": "Активні Кути",
+    "keyboardShortcuts": "Клавіатурні Скорочення",
+    "customTags": "Користувацькі Теги",
+    "resetAllTags": "Скинути Всі Теги (Dev)",
+    "about": "Про Launchpad"
   },
   "appContextMenu": {
     "open": "Відкрити",
     "revealInFinder": "Показати у Finder",
     "moveToTrash": "Перемістити в Корзину",
-    "hideFromLaunchpad": "Сховати з Launchpad"
+    "hideFromLaunchpad": "Сховати з Launchpad",
+    "manageTags": "Керувати Тегами",
+    "createNewTag": "Створити Новий Тег",
+    "deleteTag": "Видалити Тег",
+    "deleteTagConfirm": "Видалити тег \"{{tagName}}\"?"
   },
   "settings": {
     "title": "Налаштування",
@@ -61,19 +72,43 @@
       "openLaunchpad": "Відкрити Launchpad",
       "examplesLabel": "Приклади: F4, CommandOrControl+Пробіл, Alt+L",
       "modifiersLabel": "Модифікатори: Cmd/CommandOrControl, Alt/Option, Shift, Ctrl"
+    },
+    "tags": {
+      "title": "Користувацькі Теги",
+      "noCustomTags": "Користувацькі теги ще не створено",
+      "createNew": "Створити Новий Тег"
     }
   },
   "folder": {
     "defaultName": "Папка",
     "newFolderName": "Нова Папка",
     "delete": "Видалити Папку",
-    "deleteConfirm": "Видалити папку \"{{name}}\"?",
-    "deleteMessage": "Програми всередині будуть переміщені до основної сітки."
+    "deleteTitle": "Видалити папку \"{{folderName}}\"?",
+    "deleteMessage": "Програми будуть переміщені до основної сітки.",
+    "deleteFolder": "Видалити Папку"
   },
   "trash": {
-    "title": "Перемістити в Корзину?",
-    "message": "Ви впевнені, що хочете перемістити \"{{appName}}\" в Корзину?",
-    "confirm": "Перемістити в Корзину",
-    "cancel": "Скасувати"
+    "confirmTitle": "Перемістити \"{{appName}}\" в Корзину?",
+    "confirmMessage": "Програму буде переміщено в Корзину. За потреби ви можете відновити її з Корзини.",
+    "moveToTrash": "Перемістити в Корзину"
+  },
+  "createTag": {
+    "title": "Створити Користувацький Тег",
+    "nameLabel": "Назва Тегу",
+    "namePlaceholder": "Введіть назву тегу...",
+    "iconLabel": "Іконка",
+    "cancel": "Скасувати",
+    "create": "Створити Тег"
+  },
+  "tags": {
+    "all": "Усі",
+    "devTools": "Інструменти Розробки",
+    "social": "Соціальні",
+    "browsers": "Браузери",
+    "utilities": "Утиліти",
+    "entertainment": "Розваги",
+    "creativity": "Творчість",
+    "planning": "Планування",
+    "office": "Офіс"
   }
 }

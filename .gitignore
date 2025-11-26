@@ -52,3 +52,4 @@ coverage
 # Claude Code instructions (project-specific)
 CLAUDE.md
 .claude
+/AUTO_CATEGORIZATION_PLAN.md

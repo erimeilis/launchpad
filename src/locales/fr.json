@@ -2,6 +2,7 @@
   "common": {
     "save": "Enregistrer",
     "cancel": "Annuler",
+    "done": "Terminé",
     "loading": "Chargement des applications...",
     "retry": "Réessayer",
     "appsPerPage": "Apps par page : {{count}}"
@@ -15,13 +16,23 @@
     "sortAlphabetically": "Trier par Ordre Alphabétique",
     "editApps": "Modifier les Apps",
     "doneEditing": "Terminer la Modification",
-    "settings": "Réglages"
+    "language": "Langue",
+    "gridLayout": "Disposition de la Grille",
+    "hotCorners": "Coins Actifs",
+    "keyboardShortcuts": "Raccourcis Clavier",
+    "customTags": "Étiquettes Personnalisées",
+    "resetAllTags": "Réinitialiser Toutes les Étiquettes (Dev)",
+    "about": "À propos de Launchpad"
   },
   "appContextMenu": {
     "open": "Ouvrir",
     "revealInFinder": "Afficher dans le Finder",
     "moveToTrash": "Mettre à la Corbeille",
-    "hideFromLaunchpad": "Masquer du Launchpad"
+    "hideFromLaunchpad": "Masquer du Launchpad",
+    "manageTags": "Gérer les Étiquettes",
+    "createNewTag": "Créer une Nouvelle Étiquette",
+    "deleteTag": "Supprimer l'Étiquette",
+    "deleteTagConfirm": "Supprimer l'étiquette \"{{tagName}}\" ?"
   },
   "settings": {
     "title": "Réglages",
@@ -61,19 +72,35 @@
       "openLaunchpad": "Ouvrir le Launchpad",
       "examplesLabel": "Exemples : F4, CommandOrControl+Espace, Alt+L",
       "modifiersLabel": "Modificateurs : Cmd/CommandOrControl, Alt/Option, Maj, Ctrl"
+    },
+    "tags": {
+      "title": "Tags Personnalisés",
+      "noCustomTags": "Aucun tag personnalisé créé",
+      "createNew": "Créer un Nouveau Tag"
     }
   },
   "folder": {
     "defaultName": "Dossier",
     "newFolderName": "Nouveau Dossier",
     "delete": "Supprimer le Dossier",
-    "deleteConfirm": "Supprimer le dossier \"{{name}}\" ?",
-    "deleteMessage": "Les apps à l'intérieur seront déplacées vers la grille principale."
+    "deleteTitle": "Supprimer le dossier \"{{folderName}}\" ?",
+    "deleteMessage": "Les apps seront déplacées vers la grille principale.",
+    "deleteFolder": "Supprimer le Dossier"
   },
   "trash": {
-    "title": "Mettre à la Corbeille ?",
-    "message": "Êtes-vous sûr de vouloir mettre \"{{appName}}\" à la Corbeille ?",
-    "confirm": "Mettre à la Corbeille",
-    "cancel": "Annuler"
+    "confirmTitle": "Mettre \"{{appName}}\" à la Corbeille ?",
+    "confirmMessage": "Cela déplacera l'application vers la Corbeille. Vous pourrez la récupérer depuis la Corbeille si nécessaire.",
+    "moveToTrash": "Mettre à la Corbeille"
+  },
+  "tags": {
+    "all": "Tout",
+    "devTools": "Outils de Développement",
+    "social": "Social",
+    "browsers": "Navigateurs",
+    "utilities": "Utilitaires",
+    "entertainment": "Divertissement",
+    "creativity": "Créativité",
+    "planning": "Planification",
+    "office": "Bureau"
   }
 }

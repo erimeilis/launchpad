@@ -2,6 +2,7 @@
   "common": {
     "save": "Guardar",
     "cancel": "Cancelar",
+    "done": "Listo",
     "loading": "Cargando aplicaciones...",
     "retry": "Reintentar",
     "appsPerPage": "Apps por página: {{count}}"
@@ -15,13 +16,23 @@
     "sortAlphabetically": "Ordenar Alfabéticamente",
     "editApps": "Editar Apps",
     "doneEditing": "Terminar Edición",
-    "settings": "Ajustes"
+    "language": "Idioma",
+    "gridLayout": "Diseño de Cuadrícula",
+    "hotCorners": "Esquinas Activas",
+    "keyboardShortcuts": "Atajos de Teclado",
+    "customTags": "Etiquetas Personalizadas",
+    "resetAllTags": "Restablecer Todas las Etiquetas (Dev)",
+    "about": "Acerca de Launchpad"
   },
   "appContextMenu": {
     "open": "Abrir",
     "revealInFinder": "Mostrar en Finder",
     "moveToTrash": "Mover a la Papelera",
-    "hideFromLaunchpad": "Ocultar del Launchpad"
+    "hideFromLaunchpad": "Ocultar del Launchpad",
+    "manageTags": "Administrar Etiquetas",
+    "createNewTag": "Crear Nueva Etiqueta",
+    "deleteTag": "Eliminar Etiqueta",
+    "deleteTagConfirm": "¿Eliminar etiqueta \"{{tagName}}\"?"
   },
   "settings": {
     "title": "Ajustes",
@@ -61,19 +72,35 @@
       "openLaunchpad": "Abrir Launchpad",
       "examplesLabel": "Ejemplos: F4, CommandOrControl+Espacio, Alt+L",
       "modifiersLabel": "Modificadores: Cmd/CommandOrControl, Alt/Opción, Mayús, Ctrl"
+    },
+    "tags": {
+      "title": "Etiquetas Personalizadas",
+      "noCustomTags": "Aún no se han creado etiquetas personalizadas",
+      "createNew": "Crear Nueva Etiqueta"
     }
   },
   "folder": {
     "defaultName": "Carpeta",
     "newFolderName": "Nueva Carpeta",
     "delete": "Eliminar Carpeta",
-    "deleteConfirm": "¿Eliminar carpeta \"{{name}}\"?",
-    "deleteMessage": "Las apps dentro se moverán a la cuadrícula principal."
+    "deleteTitle": "¿Eliminar carpeta \"{{folderName}}\"?",
+    "deleteMessage": "Las apps se moverán a la cuadrícula principal.",
+    "deleteFolder": "Eliminar Carpeta"
   },
   "trash": {
-    "title": "¿Mover a la Papelera?",
-    "message": "¿Estás seguro de que quieres mover \"{{appName}}\" a la Papelera?",
-    "confirm": "Mover a la Papelera",
-    "cancel": "Cancelar"
+    "confirmTitle": "¿Mover \"{{appName}}\" a la Papelera?",
+    "confirmMessage": "Esto moverá la aplicación a la Papelera. Puedes recuperarla desde la Papelera si es necesario.",
+    "moveToTrash": "Mover a la Papelera"
+  },
+  "tags": {
+    "all": "Todas",
+    "devTools": "Herramientas de Desarrollo",
+    "social": "Social",
+    "browsers": "Navegadores",
+    "utilities": "Utilidades",
+    "entertainment": "Entretenimiento",
+    "creativity": "Creatividad",
+    "planning": "Planificación",
+    "office": "Oficina"
   }
 }

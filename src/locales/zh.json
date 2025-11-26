@@ -2,6 +2,7 @@
   "common": {
     "save": "保存",
     "cancel": "取消",
+    "done": "完成",
     "loading": "正在加载应用程序...",
     "retry": "重试",
     "appsPerPage": "每页应用数：{{count}}"
@@ -15,13 +16,23 @@
     "sortAlphabetically": "按字母顺序排序",
     "editApps": "编辑应用",
     "doneEditing": "完成编辑",
-    "settings": "设置"
+    "language": "语言",
+    "gridLayout": "网格布局",
+    "hotCorners": "触发角",
+    "keyboardShortcuts": "键盘快捷键",
+    "customTags": "自定义标签",
+    "resetAllTags": "重置所有标签（开发）",
+    "about": "关于启动台"
   },
   "appContextMenu": {
     "open": "打开",
     "revealInFinder": "在访达中显示",
     "moveToTrash": "移到废纸篓",
-    "hideFromLaunchpad": "从启动台中隐藏"
+    "hideFromLaunchpad": "从启动台中隐藏",
+    "manageTags": "管理标签",
+    "createNewTag": "创建新标签",
+    "deleteTag": "删除标签",
+    "deleteTagConfirm": "删除标签\"{{tagName}}\"？"
   },
   "settings": {
     "title": "设置",
@@ -61,19 +72,43 @@
       "openLaunchpad": "打开启动台",
       "examplesLabel": "示例：F4、CommandOrControl+空格、Alt+L",
       "modifiersLabel": "修饰键：Cmd/CommandOrControl、Alt/Option、Shift、Ctrl"
+    },
+    "tags": {
+      "title": "自定义标签",
+      "noCustomTags": "尚未创建自定义标签",
+      "createNew": "创建新标签"
     }
   },
   "folder": {
     "defaultName": "文件夹",
     "newFolderName": "新建文件夹",
     "delete": "删除文件夹",
-    "deleteConfirm": "删除文件夹\"{{name}}\"？",
-    "deleteMessage": "文件夹内的应用将移至主网格。"
+    "deleteTitle": "删除文件夹\"{{folderName}}\"？",
+    "deleteMessage": "应用将移回主网格。",
+    "deleteFolder": "删除文件夹"
   },
   "trash": {
-    "title": "移到废纸篓？",
-    "message": "您确定要将\"{{appName}}\"移到废纸篓吗？",
-    "confirm": "移到废纸篓",
-    "cancel": "取消"
+    "confirmTitle": "将\"{{appName}}\"移到废纸篓？",
+    "confirmMessage": "这将把应用程序移到废纸篓。如需要，您可以从废纸篓中恢复。",
+    "moveToTrash": "移到废纸篓"
+  },
+  "createTag": {
+    "title": "创建自定义标签",
+    "nameLabel": "标签名称",
+    "namePlaceholder": "输入标签名称...",
+    "iconLabel": "图标",
+    "cancel": "取消",
+    "create": "创建标签"
+  },
+  "tags": {
+    "all": "全部",
+    "devTools": "开发工具",
+    "social": "社交",
+    "browsers": "浏览器",
+    "utilities": "实用工具",
+    "entertainment": "娱乐",
+    "creativity": "创意",
+    "planning": "规划",
+    "office": "办公"
   }
 }

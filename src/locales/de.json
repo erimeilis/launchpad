@@ -2,6 +2,7 @@
   "common": {
     "save": "Sichern",
     "cancel": "Abbrechen",
+    "done": "Fertig",
     "loading": "Anwendungen werden geladen...",
     "retry": "Wiederholen",
     "appsPerPage": "Apps pro Seite: {{count}}"
@@ -15,13 +16,23 @@
     "sortAlphabetically": "Alphabetisch Sortieren",
     "editApps": "Apps Bearbeiten",
     "doneEditing": "Bearbeitung Beenden",
-    "settings": "Einstellungen"
+    "language": "Sprache",
+    "gridLayout": "Rasterlayout",
+    "hotCorners": "Aktive Ecken",
+    "keyboardShortcuts": "Tastaturkurzbefehle",
+    "customTags": "Eigene Tags",
+    "resetAllTags": "Alle Tags Zurücksetzen (Dev)",
+    "about": "Über Launchpad"
   },
   "appContextMenu": {
     "open": "Öffnen",
     "revealInFinder": "Im Finder Anzeigen",
     "moveToTrash": "In den Papierkorb",
-    "hideFromLaunchpad": "Aus Launchpad Ausblenden"
+    "hideFromLaunchpad": "Aus Launchpad Ausblenden",
+    "manageTags": "Tags Verwalten",
+    "createNewTag": "Neues Tag Erstellen",
+    "deleteTag": "Tag Löschen",
+    "deleteTagConfirm": "Tag \"{{tagName}}\" löschen?"
   },
   "settings": {
     "title": "Einstellungen",
@@ -61,19 +72,35 @@
       "openLaunchpad": "Launchpad Öffnen",
       "examplesLabel": "Beispiele: F4, CommandOrControl+Leertaste, Alt+L",
       "modifiersLabel": "Modifikatoren: Cmd/CommandOrControl, Alt/Option, Umschalt, Strg"
+    },
+    "tags": {
+      "title": "Benutzerdefinierte Tags",
+      "noCustomTags": "Noch keine benutzerdefinierten Tags erstellt",
+      "createNew": "Neues Tag erstellen"
     }
   },
   "folder": {
     "defaultName": "Ordner",
     "newFolderName": "Neuer Ordner",
     "delete": "Ordner Löschen",
-    "deleteConfirm": "Ordner \"{{name}}\" löschen?",
-    "deleteMessage": "Apps darin werden zum Hauptraster verschoben."
+    "deleteTitle": "Ordner \"{{folderName}}\" löschen?",
+    "deleteMessage": "Apps werden zum Hauptraster verschoben.",
+    "deleteFolder": "Ordner Löschen"
   },
   "trash": {
-    "title": "In den Papierkorb?",
-    "message": "Möchten Sie \"{{appName}}\" wirklich in den Papierkorb verschieben?",
-    "confirm": "In den Papierkorb",
-    "cancel": "Abbrechen"
+    "confirmTitle": "\"{{appName}}\" in den Papierkorb verschieben?",
+    "confirmMessage": "Die Anwendung wird in den Papierkorb verschoben. Sie können sie bei Bedarf aus dem Papierkorb wiederherstellen.",
+    "moveToTrash": "In den Papierkorb"
+  },
+  "tags": {
+    "all": "Alle",
+    "devTools": "Entwicklungstools",
+    "social": "Sozial",
+    "browsers": "Browser",
+    "utilities": "Dienstprogramme",
+    "entertainment": "Unterhaltung",
+    "creativity": "Kreativität",
+    "planning": "Planung",
+    "office": "Büro"
   }
 }

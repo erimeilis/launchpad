@@ -1,3 +1,7 @@
+import { useTranslation } from "react-i18next";
+import { Button } from "./ui/Button";
+import { Modal } from "./ui/Modal";
+
 interface TrashConfirmationProps {
   appName: string;
   onConfirm: () => void;
@@ -9,22 +13,21 @@ interface TrashConfirmationProps {
  * Prevents accidental deletion of applications
  */
 export function TrashConfirmation({ appName, onConfirm, onCancel }: TrashConfirmationProps) {
+  const { t } = useTranslation();
+
   return (
-    <div className="confirmation-modal" onClick={onCancel}>
-      <div className="confirmation-content" onClick={(e) => e.stopPropagation()}>
-        <h2 className="confirmation-title">Move "{appName}" to Trash?</h2>
-        <p className="confirmation-message">
-          This will move the application to Trash. You can recover it from Trash if needed.
-        </p>
-        <div className="confirmation-buttons">
-          <button className="confirmation-cancel-button" onClick={onCancel}>
-            Cancel
-          </button>
-          <button className="confirmation-danger-button" onClick={onConfirm}>
-            Move to Trash
-          </button>
-        </div>
+    <Modal onClose={onCancel} title={t("trash.confirmTitle", { appName })}>
+      <p className="m-0 mb-6 text-[14px] text-[var(--text-secondary)] leading-relaxed">
+        {t("trash.confirmMessage")}
+      </p>
+      <div className="flex justify-center gap-2.5">
+        <Button onClick={onCancel} variant="ghost" className="px-5 py-2.5 text-[13px] font-medium border border-[var(--border-secondary)]">
+          {t("common.cancel")}
+        </Button>
+        <Button onClick={onConfirm} variant="danger" className="px-5 py-2.5 text-[13px] font-medium bg-[var(--danger-red)] text-white hover:opacity-90">
+          {t("trash.moveToTrash")}
+        </Button>
       </div>
-    </div>
+    </Modal>
   );
 }

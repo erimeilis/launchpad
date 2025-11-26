@@ -8,14 +8,17 @@
 
 - **🎯 Grid-Based App Display** - iOS/iPadOS-style full-screen grid interface
 - **📁 Folder Organization** - Create folders by dragging apps together, customize folder names
+- **🏷️ Tags & Categories** - Organize apps with custom tags, filter by category with the tag bar
 - **🔍 Real-Time Search** - Instant app filtering, searches inside folders too
 - **📱 Multi-Page Support** - Organize hundreds of apps across multiple pages
 - **🎨 Native macOS Vibrancy** - Beautiful glass effect with desktop wallpaper blur
+- **🌈 OS Accent Color** - UI follows your macOS accent color preference
 - **⌨️ Customizable Keyboard Shortcuts** - Default F4 to open (fully customizable), Esc to close, arrows for navigation
 - **🖱️ Drag & Drop** - Rearrange apps freely, drag between pages with edge detection
 - **🗑️ App Management** - Right-click apps to open, reveal in Finder, hide, or move to Trash
 - **🖼️ Multi-Monitor Support** - Smart window positioning on the monitor with cursor focus
 - **🔲 Hot Corners** - Trigger Launchpad by moving mouse to screen corners (configurable)
+- **🌍 Internationalization** - Available in 8 languages (EN, DE, ES, FR, JA, PL, UK, ZH)
 - **✨ macOS Tahoe Design** - Unified confirmation dialogs with modern macOS styling
 - **💾 Persistent Layout** - Your app arrangement is saved automatically
 - **⚡ Lightweight** - Built with Tauri for native performance
@@ -41,7 +44,7 @@ This project restores the **original Launchpad experience** that users loved, as
 
 ### Download Pre-Built App
 
-1. Download the latest `.dmg` from [Releases](https://github.com/your-username/launchpad/releases)
+1. Download the latest `.dmg` from [Releases](https://github.com/erimeilis/launchpad/releases)
 2. Open the DMG and drag Launchpad to Applications
 3. Launch from Applications folder or press **F4**
 
@@ -155,6 +158,11 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 - [x] App context menu (reveal in Finder, move to Trash, hide)
 - [x] Hot corners activation (configurable corner, threshold, debounce)
 - [x] Customizable global keyboard shortcuts
+- [x] OS theme integration (light/dark mode)
+- [x] OS accent color integration
+- [x] Internationalization (8 languages)
+- [x] Tags & categories for app organization
+- [x] Custom tag creation with icons
 
 **Planned:**
 - [ ] Trackpad gestures (pinch to open/close)

@@ -2,6 +2,7 @@
   "common": {
     "save": "Zapisz",
     "cancel": "Anuluj",
+    "done": "Gotowe",
     "loading": "Ładowanie aplikacji...",
     "retry": "Ponów",
     "appsPerPage": "Aplikacji na stronę: {{count}}"
@@ -15,13 +16,23 @@
     "sortAlphabetically": "Sortuj Alfabetycznie",
     "editApps": "Edytuj Aplikacje",
     "doneEditing": "Zakończ Edycję",
-    "settings": "Ustawienia"
+    "language": "Język",
+    "gridLayout": "Układ Siatki",
+    "hotCorners": "Aktywne Rogi",
+    "keyboardShortcuts": "Skróty Klawiszowe",
+    "customTags": "Niestandardowe Tagi",
+    "resetAllTags": "Resetuj Wszystkie Tagi (Dev)",
+    "about": "O Launchpadzie"
   },
   "appContextMenu": {
     "open": "Otwórz",
     "revealInFinder": "Pokaż w Finderze",
     "moveToTrash": "Przenieś do Kosza",
-    "hideFromLaunchpad": "Ukryj w Launchpadzie"
+    "hideFromLaunchpad": "Ukryj w Launchpadzie",
+    "manageTags": "Zarządzaj Tagami",
+    "createNewTag": "Utwórz Nowy Tag",
+    "deleteTag": "Usuń Tag",
+    "deleteTagConfirm": "Usunąć tag \"{{tagName}}\"?"
   },
   "settings": {
     "title": "Ustawienia",
@@ -61,19 +72,43 @@
       "openLaunchpad": "Otwórz Launchpad",
       "examplesLabel": "Przykłady: F4, CommandOrControl+Spacja, Alt+L",
       "modifiersLabel": "Modyfikatory: Cmd/CommandOrControl, Alt/Option, Shift, Ctrl"
+    },
+    "tags": {
+      "title": "Niestandardowe Tagi",
+      "noCustomTags": "Nie utworzono jeszcze niestandardowych tagów",
+      "createNew": "Utwórz Nowy Tag"
     }
   },
   "folder": {
     "defaultName": "Folder",
     "newFolderName": "Nowy Folder",
     "delete": "Usuń Folder",
-    "deleteConfirm": "Usunąć folder \"{{name}}\"?",
-    "deleteMessage": "Aplikacje w środku zostaną przeniesione do głównej siatki."
+    "deleteTitle": "Usunąć folder \"{{folderName}}\"?",
+    "deleteMessage": "Aplikacje zostaną przeniesione do głównej siatki.",
+    "deleteFolder": "Usuń Folder"
   },
   "trash": {
-    "title": "Przenieść do Kosza?",
-    "message": "Czy na pewno chcesz przenieść \"{{appName}}\" do Kosza?",
-    "confirm": "Przenieś do Kosza",
-    "cancel": "Anuluj"
+    "confirmTitle": "Przenieść \"{{appName}}\" do Kosza?",
+    "confirmMessage": "Aplikacja zostanie przeniesiona do Kosza. W razie potrzeby możesz ją odzyskać z Kosza.",
+    "moveToTrash": "Przenieś do Kosza"
+  },
+  "createTag": {
+    "title": "Utwórz Niestandardowy Tag",
+    "nameLabel": "Nazwa Tagu",
+    "namePlaceholder": "Wpisz nazwę tagu...",
+    "iconLabel": "Ikona",
+    "cancel": "Anuluj",
+    "create": "Utwórz Tag"
+  },
+  "tags": {
+    "all": "Wszystkie",
+    "devTools": "Narzędzia Programistyczne",
+    "social": "Społecznościowe",
+    "browsers": "Przeglądarki",
+    "utilities": "Narzędzia",
+    "entertainment": "Rozrywka",
+    "creativity": "Kreatywność",
+    "planning": "Planowanie",
+    "office": "Biuro"
   }
 }
