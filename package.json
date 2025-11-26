@@ -1,7 +1,7 @@
 {
   "name": "launchpad",
   "private": true,
-  "version": "0.8.0",
+  "version": "0.8.1",
   "type": "module",
   "description": "macOS Launchpad recreation - Full-screen app launcher with folders and custom organization",
   "author": "Launchpad Contributors",

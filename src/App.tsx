@@ -542,6 +542,36 @@ function App() {
     };
   }, [gridSettings.globalShortcut]);
 
+  // Apply hot corner settings on startup (runs once on mount)
+  // Uses a ref to capture initial settings to avoid dependency warnings
+  const hotCornerInitializedRef = useRef(false);
+  useEffect(() => {
+    if (hotCornerInitializedRef.current) return;
+    hotCornerInitializedRef.current = true;
+
+    async function applyHotCornerOnStartup() {
+      const { invoke } = await import("@tauri-apps/api/core");
+      // Read from localStorage directly to get the initial saved settings
+      const saved = localStorage.getItem("launchpad-grid-settings");
+      if (!saved) return;
+
+      try {
+        const settings = JSON.parse(saved);
+        if (settings.hotCornerEnabled) {
+          await invoke("enable_hot_corner", {
+            corner: settings.hotCorner || "top-left",
+            threshold: settings.hotCornerThreshold || 10,
+            debounceMs: settings.hotCornerDebounce || 300,
+          });
+        }
+      } catch (err) {
+        console.error("Failed to apply hot corner settings on startup:", err);
+      }
+    }
+
+    applyHotCornerOnStartup();
+  }, []);
+
   // Context menu handler
   function handleContextMenu(e: React.MouseEvent) {
     e.preventDefault();

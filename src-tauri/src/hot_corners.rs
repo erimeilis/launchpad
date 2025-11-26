@@ -152,11 +152,23 @@ fn detect_corner(
     let relative_x = mouse_x - screen.x;
     let relative_y = mouse_y - screen.y;
 
+    // First, verify the mouse is actually on this screen
+    // This prevents false positives when mouse is on a different monitor
+    // (which would result in negative or out-of-bounds relative coordinates)
+    if relative_x < 0.0
+        || relative_y < 0.0
+        || relative_x > screen.width
+        || relative_y > screen.height
+    {
+        return None;
+    }
+
     // NOTE: macOS coordinate system has y=0 at BOTTOM, y increases going UP
     // So "top" corners have large y values (near screen.height)
     // and "bottom" corners have small y values (near 0)
 
     // Top-left corner (small x, large y)
+    // Must be within threshold of left edge AND within threshold of top edge
     if relative_x <= threshold && relative_y >= (screen.height - threshold) {
         return Some(Corner::TopLeft);
     }

@@ -63,6 +63,8 @@ export function useDragAndDrop({
   const openFolderRef = useRef(openFolder);
   const currentPageRef = useRef(currentPage);
   const isFilteringRef = useRef(isFiltering);
+  const gridSettingsRef = useRef(gridSettings);
+  const appsPerPageRef = useRef(appsPerPage);
 
   // Ref for handleDrop function (defined later)
   const handleDropRef = useRef<((e: React.DragEvent | null, targetIndex: number, targetItem: LaunchpadItem) => void) | null>(null);
@@ -73,6 +75,8 @@ export function useDragAndDrop({
   useEffect(() => { openFolderRef.current = openFolder; }, [openFolder]);
   useEffect(() => { currentPageRef.current = currentPage; }, [currentPage]);
   useEffect(() => { isFilteringRef.current = isFiltering; }, [isFiltering]);
+  useEffect(() => { gridSettingsRef.current = gridSettings; }, [gridSettings]);
+  useEffect(() => { appsPerPageRef.current = appsPerPage; }, [appsPerPage]);
 
   // Wrapper setters that update refs SYNCHRONOUSLY (avoids race conditions)
   const setIsDraggingWithRef = (value: boolean) => {
@@ -282,7 +286,8 @@ export function useDragAndDrop({
         // Edge detection for page switching (100px zones on left/right)
         const EDGE_ZONE = 100;
         const screenWidth = window.innerWidth;
-        const pages = Math.ceil(filteredItems.length / appsPerPage);
+        const curAppsPerPage = appsPerPageRef.current;
+        const pages = Math.ceil(filteredItems.length / curAppsPerPage);
 
         // Clear any existing timer
         if (pageSwitchTimerRef.current !== null) {
@@ -352,7 +357,7 @@ export function useDragAndDrop({
             const gridX = e.clientX - rect.left - paddingLeft;
             const gridY = e.clientY - rect.top - paddingTop;
 
-            const cols = gridSettings.cols;
+            const cols = gridSettingsRef.current.cols;
 
             // Get the actual first app-item to calculate real dimensions
             const firstItem = gridElement.querySelector(".app-item") as HTMLElement | null;
@@ -382,7 +387,7 @@ export function useDragAndDrop({
             const col = Math.max(0, Math.floor(gridX / itemWidth));
             const row = Math.max(0, Math.floor(gridY / itemHeight));
             const targetIndex = row * cols + col;
-            const currentStartIndex = curPage * appsPerPage;
+            const currentStartIndex = curPage * curAppsPerPage;
             const targetGlobalIndex = currentStartIndex + targetIndex;
 
             if (
@@ -442,7 +447,8 @@ export function useDragAndDrop({
               !isDraggingFromFolder
             ) {
               const targetItem = curItems[targetGlobalIndex];
-              const currentStartIndex = curPage * appsPerPage;
+              const curAppsPerPage = appsPerPageRef.current;
+              const currentStartIndex = curPage * curAppsPerPage;
               const targetIndexInPage = targetGlobalIndex - currentStartIndex;
 
               handleDropRef.current?.(null, targetIndexInPage, targetItem);
@@ -467,7 +473,8 @@ export function useDragAndDrop({
               const gridX = e.clientX - rect.left - paddingLeft;
               const gridY = e.clientY - rect.top - paddingTop;
 
-              const cols = gridSettings.cols;
+              const cols = gridSettingsRef.current.cols;
+              const curAppsPerPage = appsPerPageRef.current;
               const firstItem = gridElement.querySelector(".app-item") as HTMLElement | null;
               let itemWidth = (rect.width - paddingLeft * 2) / cols;
               let itemHeight = itemWidth;
@@ -498,7 +505,7 @@ export function useDragAndDrop({
               const row = Math.max(0, Math.floor(gridY / itemHeight));
 
               const targetIndex = row * cols + col;
-              const currentStartIndex = curPage * appsPerPage;
+              const currentStartIndex = curPage * curAppsPerPage;
               targetGlobalIndex = currentStartIndex + targetIndex;
             }
           }
