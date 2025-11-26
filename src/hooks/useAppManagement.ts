@@ -1,34 +1,104 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { listen, UnlistenFn } from "@tauri-apps/api/event";
 import type { App, Folder, LaunchpadItem } from "../types";
 import { isFolder } from "../types";
 
+/** Icon update payload from backend */
+interface IconUpdate {
+  bundle_id: string;
+  icon: string;
+}
+
 /**
  * Hook that manages app loading, launching, and item ordering
+ * Uses progressive loading for fast startup
  */
 export function useAppManagement() {
   const [apps, setApps] = useState<App[]>([]);
   const [items, setItems] = useState<LaunchpadItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [iconsLoading, setIconsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Keep a ref to apps for icon updates without causing re-renders
+  const appsRef = useRef<App[]>([]);
+
   /**
-   * Load installed applications from the system
+   * Load installed applications using progressive loading
+   * 1. First, get apps quickly without icons
+   * 2. Then, load icons in parallel via events
    */
   async function loadApps() {
     try {
       setLoading(true);
-      const installedApps = await invoke<App[]>("get_installed_apps");
+      setIconsLoading(true);
+
+      // Phase 1: Get apps quickly without icons
+      const installedApps = await invoke<App[]>("get_installed_apps_fast");
+      appsRef.current = installedApps;
       setApps(installedApps);
+      setLoading(false); // Apps are ready to display!
       setError(null);
+
+      // Phase 2: Start loading icons in background
+      invoke("load_app_icons").catch((err) => {
+        console.error("Failed to load app icons:", err);
+      });
     } catch (err) {
       console.error("Failed to load apps:", err);
       setError("Failed to load applications");
-    } finally {
       setLoading(false);
+      setIconsLoading(false);
     }
   }
+
+  /**
+   * Handle icon updates from backend
+   */
+  const handleIconUpdates = useCallback((updates: IconUpdate[]) => {
+    // Create a map for fast lookup
+    const iconMap = new Map(updates.map((u) => [u.bundle_id, u.icon]));
+
+    // Update apps with new icons
+    setApps((prevApps) => {
+      const newApps = prevApps.map((app) => {
+        const newIcon = iconMap.get(app.bundle_id);
+        if (newIcon) {
+          return { ...app, icon: newIcon };
+        }
+        return app;
+      });
+      appsRef.current = newApps;
+      return newApps;
+    });
+  }, []);
+
+  // Set up event listeners for progressive icon loading
+  useEffect(() => {
+    let unlistenIcons: UnlistenFn | null = null;
+    let unlistenComplete: UnlistenFn | null = null;
+
+    async function setupListeners() {
+      // Listen for batched icon updates
+      unlistenIcons = await listen<IconUpdate[]>("icons-loaded", (event) => {
+        handleIconUpdates(event.payload);
+      });
+
+      // Listen for completion
+      unlistenComplete = await listen("icons-complete", () => {
+        setIconsLoading(false);
+      });
+    }
+
+    setupListeners();
+
+    return () => {
+      if (unlistenIcons) unlistenIcons();
+      if (unlistenComplete) unlistenComplete();
+    };
+  }, [handleIconUpdates]);
 
   /**
    * Launch an application and minimize the window
@@ -147,6 +217,7 @@ export function useAppManagement() {
     apps,
     items,
     loading,
+    iconsLoading,
     error,
     setApps,
     setItems,

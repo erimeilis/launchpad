@@ -1,6 +1,9 @@
+use directories::ProjectDirs;
+use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
 use tauri::{Emitter, Manager};
 use walkdir::WalkDir;
@@ -9,6 +12,53 @@ mod hot_corners;
 use hot_corners::{Corner, HotCornerConfig, HotCornerMonitor};
 
 static HOT_CORNER_MONITOR: OnceLock<HotCornerMonitor> = OnceLock::new();
+
+/// Get the icon cache directory, creating it if it doesn't exist
+fn get_icon_cache_dir() -> Option<PathBuf> {
+    let proj_dirs = ProjectDirs::from("com", "launchpad", "Launchpad")?;
+    let cache_dir = proj_dirs.cache_dir().join("icons");
+    if !cache_dir.exists() {
+        fs::create_dir_all(&cache_dir).ok()?;
+    }
+    Some(cache_dir)
+}
+
+/// Generate a cache key for an app icon based on path and modification time
+fn get_icon_cache_key(app_path: &Path) -> Option<String> {
+    let metadata = fs::metadata(app_path).ok()?;
+    let modified = metadata.modified().ok()?;
+    let duration = modified
+        .duration_since(std::time::UNIX_EPOCH)
+        .ok()?
+        .as_secs();
+
+    let mut hasher = Sha256::new();
+    hasher.update(app_path.to_string_lossy().as_bytes());
+    hasher.update(duration.to_string().as_bytes());
+    let hash = hasher.finalize();
+    Some(format!("{:x}", hash)[..16].to_string())
+}
+
+/// Try to load an icon from cache
+fn load_cached_icon(cache_key: &str) -> Option<String> {
+    let cache_dir = get_icon_cache_dir()?;
+    let cache_path = cache_dir.join(format!("{}.png", cache_key));
+
+    if cache_path.exists() {
+        let png_data = fs::read(&cache_path).ok()?;
+        let encoded =
+            base64::Engine::encode(&base64::engine::general_purpose::STANDARD, &png_data);
+        return Some(format!("data:image/png;base64,{}", encoded));
+    }
+    None
+}
+
+/// Save an icon to cache (saves the raw PNG bytes)
+fn save_icon_to_cache(cache_key: &str, png_data: &[u8]) -> Option<()> {
+    let cache_dir = get_icon_cache_dir()?;
+    let cache_path = cache_dir.join(format!("{}.png", cache_key));
+    fs::write(cache_path, png_data).ok()
+}
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct App {
@@ -20,6 +70,154 @@ struct App {
     tags: Vec<String>,             // Auto-detected category tags
 }
 
+/// Event payload for icon updates
+#[derive(Debug, Serialize, Clone)]
+struct IconUpdate {
+    bundle_id: String,
+    icon: String,
+}
+
+/// Internal struct for app metadata without icon (used during fast loading)
+#[derive(Debug, Clone)]
+struct AppMetadata {
+    name: String,
+    bundle_id: String,
+    path: String,
+    actual_app_path: PathBuf, // Path to the actual app bundle (for icon extraction)
+    source_folder: Option<String>,
+    tags: Vec<String>,
+}
+
+/// Get installed apps WITHOUT icons - this is the fast path for immediate display
+#[tauri::command]
+fn get_installed_apps_fast() -> Result<Vec<App>, String> {
+    let mut app_metadata = Vec::new();
+
+    // Scan all application directories (fast - no icon extraction)
+    scan_applications_directory_fast("/Applications", None, &mut app_metadata, 2);
+    scan_applications_directory_fast("/System/Applications", Some("System"), &mut app_metadata, 1);
+    scan_applications_directory_fast(
+        "/System/Applications/Utilities",
+        Some("Utilities"),
+        &mut app_metadata,
+        1,
+    );
+    scan_applications_directory_fast(
+        "/Applications/Utilities",
+        Some("Utilities"),
+        &mut app_metadata,
+        1,
+    );
+
+    // Scan user Applications folder
+    if let Some(home_dir) = std::env::var_os("HOME") {
+        let user_apps_path = PathBuf::from(home_dir).join("Applications");
+        if user_apps_path.exists() {
+            scan_applications_directory_fast(
+                user_apps_path.to_str().unwrap_or(""),
+                None,
+                &mut app_metadata,
+                2,
+            );
+        }
+    }
+
+    // Remove duplicates based on bundle_id
+    app_metadata.sort_by(|a, b| a.bundle_id.cmp(&b.bundle_id));
+    app_metadata.dedup_by(|a, b| a.bundle_id == b.bundle_id);
+
+    // Sort alphabetically by name
+    app_metadata.sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
+
+    // Convert to App structs without icons
+    let apps: Vec<App> = app_metadata
+        .into_iter()
+        .map(|m| App {
+            name: m.name,
+            bundle_id: m.bundle_id,
+            path: m.path,
+            icon: None,
+            source_folder: m.source_folder,
+            tags: m.tags,
+        })
+        .collect();
+
+    Ok(apps)
+}
+
+/// Load app icons in parallel using rayon, emitting updates as they're ready
+#[tauri::command]
+async fn load_app_icons(app: tauri::AppHandle) -> Result<(), String> {
+    let mut app_metadata = Vec::new();
+
+    // Scan all application directories (fast - no icon extraction)
+    scan_applications_directory_fast("/Applications", None, &mut app_metadata, 2);
+    scan_applications_directory_fast("/System/Applications", Some("System"), &mut app_metadata, 1);
+    scan_applications_directory_fast(
+        "/System/Applications/Utilities",
+        Some("Utilities"),
+        &mut app_metadata,
+        1,
+    );
+    scan_applications_directory_fast(
+        "/Applications/Utilities",
+        Some("Utilities"),
+        &mut app_metadata,
+        1,
+    );
+
+    // Scan user Applications folder
+    if let Some(home_dir) = std::env::var_os("HOME") {
+        let user_apps_path = PathBuf::from(home_dir).join("Applications");
+        if user_apps_path.exists() {
+            scan_applications_directory_fast(
+                user_apps_path.to_str().unwrap_or(""),
+                None,
+                &mut app_metadata,
+                2,
+            );
+        }
+    }
+
+    // Remove duplicates
+    app_metadata.sort_by(|a, b| a.bundle_id.cmp(&b.bundle_id));
+    app_metadata.dedup_by(|a, b| a.bundle_id == b.bundle_id);
+
+    // Extract icons in parallel using rayon
+    let icons: Vec<(String, Option<String>)> = app_metadata
+        .par_iter()
+        .map(|meta| {
+            let icon = extract_app_icon_for_path(&meta.actual_app_path);
+            (meta.bundle_id.clone(), icon)
+        })
+        .collect();
+
+    // Emit icon updates in batches for efficiency
+    let batch_size = 10;
+    for chunk in icons.chunks(batch_size) {
+        let updates: Vec<IconUpdate> = chunk
+            .iter()
+            .filter_map(|(bundle_id, icon)| {
+                icon.as_ref().map(|i| IconUpdate {
+                    bundle_id: bundle_id.clone(),
+                    icon: i.clone(),
+                })
+            })
+            .collect();
+
+        if !updates.is_empty() {
+            let _ = app.emit("icons-loaded", updates);
+        }
+    }
+
+    // Emit completion event
+    let _ = app.emit("icons-complete", ());
+
+    Ok(())
+}
+
+/// Legacy command that loads everything at once (for backwards compatibility)
+/// This now uses caching and is faster on subsequent runs
 #[tauri::command]
 fn get_installed_apps() -> Result<Vec<App>, String> {
     let mut apps = Vec::new();
@@ -43,7 +241,7 @@ fn get_installed_apps() -> Result<Vec<App>, String> {
 
     // Scan user Applications folder
     if let Some(home_dir) = std::env::var_os("HOME") {
-        let user_apps_path = std::path::PathBuf::from(home_dir).join("Applications");
+        let user_apps_path = PathBuf::from(home_dir).join("Applications");
         if user_apps_path.exists() {
             scan_applications_directory(user_apps_path.to_str().unwrap_or(""), None, &mut apps, 2);
         }
@@ -73,6 +271,27 @@ fn scan_applications_directory(
         let entry_path = entry.path();
         if entry_path.extension().and_then(|s| s.to_str()) == Some("app") {
             if let Some(app) = parse_app_bundle(entry_path, source_folder) {
+                apps.push(app);
+            }
+        }
+    }
+}
+
+/// Fast version that doesn't extract icons - for progressive loading
+fn scan_applications_directory_fast(
+    path: &str,
+    source_folder: Option<&str>,
+    apps: &mut Vec<AppMetadata>,
+    max_depth: usize,
+) {
+    for entry in WalkDir::new(path)
+        .max_depth(max_depth)
+        .into_iter()
+        .filter_map(|e| e.ok())
+    {
+        let entry_path = entry.path();
+        if entry_path.extension().and_then(|s| s.to_str()) == Some("app") {
+            if let Some(app) = parse_app_bundle_fast(entry_path, source_folder) {
                 apps.push(app);
             }
         }
@@ -175,6 +394,110 @@ fn parse_app_bundle(app_path: &Path, source_folder: Option<&str>) -> Option<App>
         source_folder: source_folder.map(|s| s.to_string()),
         tags,
     })
+}
+
+/// Fast version of parse_app_bundle that doesn't extract icons
+fn parse_app_bundle_fast(app_path: &Path, source_folder: Option<&str>) -> Option<AppMetadata> {
+    // Try standard macOS Info.plist location first
+    let mut info_plist_path = app_path.join("Contents/Info.plist");
+    let mut actual_app_path = app_path.to_path_buf();
+
+    // Check for wrapped iOS apps
+    if !info_plist_path.exists() {
+        let wrapped_bundle_link = app_path.join("WrappedBundle");
+
+        if wrapped_bundle_link.is_symlink() || wrapped_bundle_link.exists() {
+            if let Ok(resolved) = fs::read_link(&wrapped_bundle_link) {
+                let inner_app = app_path.join(&resolved);
+                let inner_plist_macos = inner_app.join("Contents/Info.plist");
+                let inner_plist_ios = inner_app.join("Info.plist");
+
+                if inner_plist_macos.exists() {
+                    info_plist_path = inner_plist_macos;
+                    actual_app_path = inner_app;
+                } else if inner_plist_ios.exists() {
+                    info_plist_path = inner_plist_ios;
+                    actual_app_path = inner_app;
+                }
+            }
+        }
+
+        // Scan Wrapper directory
+        if !info_plist_path.exists() {
+            let wrapper_dir = app_path.join("Wrapper");
+            if wrapper_dir.is_dir() {
+                if let Ok(entries) = fs::read_dir(&wrapper_dir) {
+                    for entry in entries.flatten() {
+                        let entry_path = entry.path();
+                        if entry_path.extension().and_then(|s| s.to_str()) == Some("app") {
+                            let inner_plist_macos = entry_path.join("Contents/Info.plist");
+                            let inner_plist_ios = entry_path.join("Info.plist");
+
+                            if inner_plist_macos.exists() {
+                                info_plist_path = inner_plist_macos;
+                                actual_app_path = entry_path;
+                                break;
+                            } else if inner_plist_ios.exists() {
+                                info_plist_path = inner_plist_ios;
+                                actual_app_path = entry_path;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if !info_plist_path.exists() {
+        return None;
+    }
+
+    let plist_value = plist::Value::from_file(&info_plist_path).ok()?;
+    let plist_dict = plist_value.as_dictionary()?;
+
+    // Get app name
+    let name = plist_dict
+        .get("CFBundleDisplayName")
+        .or_else(|| plist_dict.get("CFBundleName"))
+        .and_then(|v| v.as_string())
+        .map(|s| s.to_string())?;
+
+    // Get bundle ID
+    let bundle_id = plist_dict
+        .get("CFBundleIdentifier")
+        .and_then(|v| v.as_string())
+        .map(|s| s.to_string())
+        .unwrap_or_else(|| String::from("unknown"));
+
+    // Detect tags from app category
+    let tags = detect_app_tags(plist_dict, &bundle_id, &name);
+
+    Some(AppMetadata {
+        name,
+        bundle_id,
+        path: app_path.to_string_lossy().to_string(),
+        actual_app_path,
+        source_folder: source_folder.map(|s| s.to_string()),
+        tags,
+    })
+}
+
+/// Extract icon for a given app path (used by parallel icon loading)
+fn extract_app_icon_for_path(app_path: &Path) -> Option<String> {
+    // Find and read Info.plist
+    let info_plist_path = if app_path.join("Contents/Info.plist").exists() {
+        app_path.join("Contents/Info.plist")
+    } else if app_path.join("Info.plist").exists() {
+        app_path.join("Info.plist")
+    } else {
+        return None;
+    };
+
+    let plist_value = plist::Value::from_file(&info_plist_path).ok()?;
+    let plist_dict = plist_value.as_dictionary()?;
+
+    extract_app_icon(app_path, plist_dict)
 }
 
 fn detect_app_tags(plist_dict: &plist::Dictionary, bundle_id: &str, name: &str) -> Vec<String> {
@@ -455,6 +778,17 @@ fn detect_tag_from_app_name(name: &str, _bundle_id: &str) -> Option<&'static str
 }
 
 fn extract_app_icon(app_path: &Path, plist_dict: &plist::Dictionary) -> Option<String> {
+    // Generate cache key for this app
+    let cache_key = get_icon_cache_key(app_path);
+    let cache_key_ref = cache_key.as_deref();
+
+    // Check cache first - this is the fast path!
+    if let Some(ref key) = cache_key {
+        if let Some(cached) = load_cached_icon(key) {
+            return Some(cached);
+        }
+    }
+
     // Try macOS style first: Contents/Resources/*.icns
     if let Some(icon_file) = plist_dict
         .get("CFBundleIconFile")
@@ -469,21 +803,29 @@ fn extract_app_icon(app_path: &Path, plist_dict: &plist::Dictionary) -> Option<S
         }
 
         if icon_path.exists() {
-            return extract_icns_as_base64(&icon_path);
+            return extract_icns_as_base64(&icon_path, cache_key_ref);
         }
 
         // Try without extension
         icon_path = resources_path.join(icon_file);
         if icon_path.exists() {
-            return extract_icns_as_base64(&icon_path);
+            return extract_icns_as_base64(&icon_path, cache_key_ref);
         }
     }
 
     // Try iOS style: PNG icons at app root
     // iOS apps use CFBundleIcons -> CFBundlePrimaryIcon -> CFBundleIconFiles
     if let Some(icons_dict) = plist_dict.get("CFBundleIcons").and_then(|v| v.as_dictionary()) {
-        if let Some(primary_icon) = icons_dict.get("CFBundlePrimaryIcon").and_then(|v| v.as_dictionary()) {
-            if let Some(icon_files) = primary_icon.get("CFBundleIconFiles").and_then(|v| v.as_array()) {
+        if let Some(primary_icon) =
+            icons_dict
+                .get("CFBundlePrimaryIcon")
+                .and_then(|v| v.as_dictionary())
+        {
+            if let Some(icon_files) =
+                primary_icon
+                    .get("CFBundleIconFiles")
+                    .and_then(|v| v.as_array())
+            {
                 // Get the icon base name (e.g., "AppIcon60x60")
                 for icon_value in icon_files {
                     if let Some(icon_base) = icon_value.as_string() {
@@ -497,7 +839,7 @@ fn extract_app_icon(app_path: &Path, plist_dict: &plist::Dictionary) -> Option<S
                         for pattern in &patterns {
                             let icon_path = app_path.join(pattern);
                             if icon_path.exists() {
-                                return extract_png_as_base64(&icon_path);
+                                return extract_png_as_base64(&icon_path, cache_key_ref);
                             }
                         }
                     }
@@ -505,10 +847,13 @@ fn extract_app_icon(app_path: &Path, plist_dict: &plist::Dictionary) -> Option<S
             }
 
             // Also try CFBundleIconName if CFBundleIconFiles didn't work
-            if let Some(icon_name) = primary_icon.get("CFBundleIconName").and_then(|v| v.as_string()) {
+            if let Some(icon_name) = primary_icon
+                .get("CFBundleIconName")
+                .and_then(|v| v.as_string())
+            {
                 // Search for any PNG starting with this name
                 if let Ok(entries) = fs::read_dir(app_path) {
-                    let mut best_icon: Option<std::path::PathBuf> = None;
+                    let mut best_icon: Option<PathBuf> = None;
                     let mut best_size = 0;
 
                     for entry in entries.flatten() {
@@ -532,7 +877,7 @@ fn extract_app_icon(app_path: &Path, plist_dict: &plist::Dictionary) -> Option<S
                     }
 
                     if let Some(icon_path) = best_icon {
-                        return extract_png_as_base64(&icon_path);
+                        return extract_png_as_base64(&icon_path, cache_key_ref);
                     }
                 }
             }
@@ -542,19 +887,27 @@ fn extract_app_icon(app_path: &Path, plist_dict: &plist::Dictionary) -> Option<S
     None
 }
 
-fn extract_png_as_base64(png_path: &Path) -> Option<String> {
+fn extract_png_as_base64(png_path: &Path, cache_key: Option<&str>) -> Option<String> {
     let png_data = fs::read(png_path).ok()?;
+
+    // Cache the PNG if we have a cache key
+    if let Some(key) = cache_key {
+        save_icon_to_cache(key, &png_data);
+    }
+
     let encoded = base64::Engine::encode(&base64::engine::general_purpose::STANDARD, &png_data);
     Some(format!("data:image/png;base64,{}", encoded))
 }
 
-fn extract_icns_as_base64(icon_path: &Path) -> Option<String> {
+fn extract_icns_as_base64(icon_path: &Path, cache_key: Option<&str>) -> Option<String> {
     use std::env;
     use std::process::Command;
 
     // Use macOS sips utility to convert ICNS to PNG
     let temp_dir = env::temp_dir();
-    let temp_png = temp_dir.join(format!("icon_{}.png", icon_path.file_stem()?.to_str()?));
+    // Use cache_key in temp filename to avoid conflicts in parallel execution
+    let temp_name = cache_key.unwrap_or("icon");
+    let temp_png = temp_dir.join(format!("launchpad_{}_{}.png", temp_name, std::process::id()));
 
     // Convert ICNS to PNG using sips (built-in macOS tool)
     let output = Command::new("sips")
@@ -570,6 +923,7 @@ fn extract_icns_as_base64(icon_path: &Path) -> Option<String> {
         .ok()?;
 
     if !output.status.success() {
+        let _ = fs::remove_file(&temp_png);
         return None;
     }
 
@@ -578,6 +932,11 @@ fn extract_icns_as_base64(icon_path: &Path) -> Option<String> {
 
     // Clean up temp file
     let _ = fs::remove_file(&temp_png);
+
+    // Cache the converted PNG
+    if let Some(key) = cache_key {
+        save_icon_to_cache(key, &png_data);
+    }
 
     // Encode as base64
     let encoded = base64::Engine::encode(&base64::engine::general_purpose::STANDARD, &png_data);
@@ -812,6 +1171,8 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             get_installed_apps,
+            get_installed_apps_fast,
+            load_app_icons,
             launch_app,
             move_app_to_trash,
             reveal_in_finder,

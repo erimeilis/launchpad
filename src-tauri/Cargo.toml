@@ -1,6 +1,6 @@
 [package]
 name = "launchpad"
-version = "0.7.0"
+version = "0.8.0"
 description = "macOS Launchpad recreation - Full-screen app launcher with folders and custom organization"
 authors = ["Launchpad Contributors"]
 license = "MIT"
@@ -33,6 +33,9 @@ image = "0.25"
 base64 = "0.22"
 window-vibrancy = "0.7.1"
 trash = "5"
+rayon = "1.10"
+directories = "5"
+sha2 = "0.10"
 cocoa = "0.25"
 core-graphics = "0.23"
 objc = "0.2"

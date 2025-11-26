@@ -21,7 +21,8 @@
 - **🌍 Internationalization** - Available in 8 languages (EN, DE, ES, FR, JA, PL, UK, ZH)
 - **✨ macOS Tahoe Design** - Unified confirmation dialogs with modern macOS styling
 - **💾 Persistent Layout** - Your app arrangement is saved automatically
-- **⚡ Lightweight** - Built with Tauri for native performance
+- **⚡ Blazing Fast Startup** - Progressive icon loading with intelligent caching
+- **🚀 Lightweight** - Built with Tauri for native performance
 
 ## 🎬 Why This Project?
 
@@ -38,6 +39,9 @@ This project restores the **original Launchpad experience** that users loved, as
 - **[Tauri 2.x](https://tauri.app/)** - Rust-based desktop framework for native macOS integration
 - **[React 19](https://react.dev/)** - Modern UI with hooks and TypeScript
 - **[Vite 7](https://vitejs.dev/)** - Lightning-fast dev server and build tool
+- **[Tailwind CSS 4](https://tailwindcss.com/)** - Utility-first CSS framework
+- **[i18next](https://www.i18next.com/)** - Internationalization framework
+- **[Phosphor Icons](https://phosphoricons.com/)** - Flexible icon family
 - **[Rust](https://www.rust-lang.org/)** - Backend for system integration and app detection
 
 ## 📦 Installation
@@ -117,10 +121,14 @@ npm run tauri build
 launchpad/
 ├── src/                    # React frontend
 │   ├── components/         # UI components
+│   │   ├── ui/            # Reusable UI primitives (Button, Modal, etc.)
+│   │   └── settings/      # Settings modal components
 │   ├── hooks/             # Custom React hooks
+│   ├── constants/         # App constants and tag definitions
+│   ├── locales/           # i18n translation files (8 languages)
 │   ├── types/             # TypeScript interfaces
 │   ├── App.tsx            # Main application
-│   └── App.css            # Styles
+│   └── App.css            # Tailwind CSS styles
 ├── src-tauri/             # Rust backend
 │   ├── src/lib.rs         # Tauri commands
 │   ├── Cargo.toml         # Rust dependencies
@@ -163,12 +171,13 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 - [x] Internationalization (8 languages)
 - [x] Tags & categories for app organization
 - [x] Custom tag creation with icons
+- [x] Auto-categorization (system tags based on app type)
+- [x] **Performance optimization** - Progressive icon loading with caching and parallel processing
 
 **Planned:**
-- [ ] Trackpad gestures (pinch to open/close)
 - [ ] iCloud sync for app layouts
-- [ ] Auto-categorization option (optional)
 - [ ] Multiple layout profiles
+- [ ] Trackpad gestures (pinch to open/close)
 
 ---
 
