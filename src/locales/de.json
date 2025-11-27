@@ -65,7 +65,7 @@
       "bottomLeft": "Unten Links",
       "bottomRight": "Unten Rechts",
       "triggerThreshold": "Auslöseschwelle (Pixel)",
-      "debounceDelay": "Entprellverzögerung (ms)"
+      "debounceDelay": "Verweildauer (wie lange der Cursor bleiben muss)"
     },
     "keyboardShortcuts": {
       "title": "Tastaturkürzel",

@@ -138,7 +138,7 @@ function App() {
       hotCornerEnabled: false,
       hotCorner: "top-left",
       hotCornerThreshold: 10,
-      hotCornerDebounce: 300,
+      hotCornerDebounce: 5000,
       globalShortcut: "F4",
       tagSettings: {
         showTagBar: true,

@@ -69,7 +69,7 @@ export function HotCornersSettings({ settings, onSettingsChange, onSave, onClose
                 type="range"
                 className="w-full h-1 rounded bg-[var(--input-bg)] outline-none appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-[18px] [&::-webkit-slider-thumb]:h-[18px] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-[0_0_0_0.5px_rgba(0,0,0,0.04),0_1px_3px_rgba(0,0,0,0.15)]"
                 min="100"
-                max="2500"
+                max="10000"
                 step="100"
                 value={settings.hotCornerDebounce}
                 onChange={(e) => onSettingsChange({ ...settings, hotCornerDebounce: parseInt(e.target.value) })}

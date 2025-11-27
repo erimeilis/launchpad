@@ -65,7 +65,7 @@
       "bottomLeft": "Lewy Dolny",
       "bottomRight": "Prawy Dolny",
       "triggerThreshold": "Próg wyzwalania (piksele)",
-      "debounceDelay": "Opóźnienie debouncingu (ms)"
+      "debounceDelay": "Czas zatrzymania (jak długo kursor musi pozostać)"
     },
     "keyboardShortcuts": {
       "title": "Skróty Klawiszowe",

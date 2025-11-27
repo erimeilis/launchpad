@@ -65,7 +65,7 @@
       "bottomLeft": "Inferior Izquierda",
       "bottomRight": "Inferior Derecha",
       "triggerThreshold": "Umbral de activación (píxeles)",
-      "debounceDelay": "Retardo de rebote (ms)"
+      "debounceDelay": "Tiempo de permanencia (cuánto debe quedarse el cursor)"
     },
     "keyboardShortcuts": {
       "title": "Atajos de Teclado",

@@ -380,6 +380,11 @@ fn parse_app_bundle(app_path: &Path, source_folder: Option<&str>) -> Option<App>
         .map(|s| s.to_string())
         .unwrap_or_else(|| String::from("unknown"));
 
+    // Filter out Launchpad itself
+    if bundle_id == "red.launchpad" {
+        return None;
+    }
+
     // Get app icon (use actual_app_path for wrapped apps since icon is in inner bundle)
     let icon = extract_app_icon(&actual_app_path, plist_dict);
 
@@ -469,6 +474,11 @@ fn parse_app_bundle_fast(app_path: &Path, source_folder: Option<&str>) -> Option
         .and_then(|v| v.as_string())
         .map(|s| s.to_string())
         .unwrap_or_else(|| String::from("unknown"));
+
+    // Filter out Launchpad itself
+    if bundle_id == "red.launchpad" {
+        return None;
+    }
 
     // Detect tags from app category
     let tags = detect_app_tags(plist_dict, &bundle_id, &name);

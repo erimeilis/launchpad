@@ -31,13 +31,14 @@ impl Default for HotCornerConfig {
             enabled: false,
             corner: Corner::Disabled,
             trigger_threshold: 10.0,
-            debounce_ms: 300,
+            debounce_ms: 5000,
         }
     }
 }
 
 pub struct HotCornerMonitor {
     config: Arc<Mutex<HotCornerConfig>>,
+    corner_enter_time: Arc<Mutex<Option<Instant>>>,
     last_trigger: Arc<Mutex<Option<Instant>>>,
     callback: Arc<dyn Fn(Corner) + Send + Sync>,
     screen_bounds: Arc<Vec<ScreenBounds>>,
@@ -54,6 +55,7 @@ impl HotCornerMonitor {
 
         Self {
             config: Arc::new(Mutex::new(config)),
+            corner_enter_time: Arc::new(Mutex::new(None)),
             last_trigger: Arc::new(Mutex::new(None)),
             callback: Arc::new(callback),
             screen_bounds: Arc::new(bounds),
@@ -69,6 +71,7 @@ impl HotCornerMonitor {
         }
 
         let config = Arc::clone(&self.config);
+        let corner_enter_time = Arc::clone(&self.corner_enter_time);
         let last_trigger = Arc::clone(&self.last_trigger);
         let callback = Arc::clone(&self.callback);
         let screens = Arc::clone(&self.screen_bounds);
@@ -79,12 +82,14 @@ impl HotCornerMonitor {
                 thread::sleep(Duration::from_millis(50)); // Check 20 times per second
 
                 // Scope the config lock
-                let (enabled, corner, threshold, debounce) = {
+                let (enabled, corner, threshold, dwell_time) = {
                     let cfg = config.lock().unwrap();
                     (cfg.enabled, cfg.corner, cfg.trigger_threshold, cfg.debounce_ms)
                 };
 
                 if !enabled || corner == Corner::Disabled {
+                    // Reset corner enter time when disabled
+                    *corner_enter_time.lock().unwrap() = None;
                     continue;
                 }
 
@@ -94,33 +99,61 @@ impl HotCornerMonitor {
                     (location.x, location.y)
                 };
 
-                // Use cached screen bounds
+                // Check if cursor is in the configured corner on any screen
+                let mut in_corner = false;
                 for screen in screens.iter() {
                     if let Some(detected_corner) = detect_corner(x, y, screen, threshold) {
-                        // Check debouncing
-                        let mut last = last_trigger.lock().unwrap();
-                        let now = Instant::now();
-
-                        let should_trigger = match *last {
-                            None => true,
-                            Some(last_time) => {
-                                now.duration_since(last_time).as_millis() >= debounce as u128
-                            }
-                        };
-
-                        if should_trigger && detected_corner == corner {
-                            *last = Some(now);
-                            drop(last); // Release lock before callback
-
-                            // Catch any panics in the callback to prevent app crashes
-                            let _result = panic::catch_unwind(panic::AssertUnwindSafe(|| {
-                                callback(detected_corner);
-                            }));
-
-                            // Break from inner for loop and continue outer loop
+                        if detected_corner == corner {
+                            in_corner = true;
                             break;
                         }
                     }
+                }
+
+                let now = Instant::now();
+
+                if in_corner {
+                    // Cursor is in corner - check dwell time
+                    let mut enter_time = corner_enter_time.lock().unwrap();
+                    let mut last = last_trigger.lock().unwrap();
+
+                    // Record when cursor first entered corner
+                    if enter_time.is_none() {
+                        *enter_time = Some(now);
+                    }
+
+                    // Check if cursor has been in corner long enough (dwell time)
+                    if let Some(entered_at) = *enter_time {
+                        let dwell_duration = now.duration_since(entered_at).as_millis();
+
+                        if dwell_duration >= dwell_time as u128 {
+                            // Check cooldown to prevent rapid re-triggering
+                            let cooldown_passed = match *last {
+                                None => true,
+                                Some(last_time) => {
+                                    // Use 2x dwell time as cooldown between triggers
+                                    now.duration_since(last_time).as_millis()
+                                        >= (dwell_time * 2) as u128
+                                }
+                            };
+
+                            if cooldown_passed {
+                                *last = Some(now);
+                                // Reset enter time so user must leave and re-enter corner
+                                *enter_time = None;
+                                drop(enter_time);
+                                drop(last);
+
+                                // Catch any panics in the callback to prevent app crashes
+                                let _result = panic::catch_unwind(panic::AssertUnwindSafe(|| {
+                                    callback(corner);
+                                }));
+                            }
+                        }
+                    }
+                } else {
+                    // Cursor left corner - reset enter time
+                    *corner_enter_time.lock().unwrap() = None;
                 }
             }
         });

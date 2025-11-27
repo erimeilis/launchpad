@@ -65,7 +65,7 @@
       "bottomLeft": "Bottom Left",
       "bottomRight": "Bottom Right",
       "triggerThreshold": "Trigger threshold (pixels)",
-      "debounceDelay": "Debounce delay (ms)"
+      "debounceDelay": "Dwell time (how long cursor must stay)"
     },
     "keyboardShortcuts": {
       "title": "Keyboard Shortcuts",

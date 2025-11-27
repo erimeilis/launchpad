@@ -65,7 +65,7 @@
       "bottomLeft": "Внизу Ліворуч",
       "bottomRight": "Внизу Праворуч",
       "triggerThreshold": "Поріг спрацювання (пікселі)",
-      "debounceDelay": "Затримка антидзвону (мс)"
+      "debounceDelay": "Час утримання (скільки курсор має залишатися)"
     },
     "keyboardShortcuts": {
       "title": "Клавіатурні Скорочення",

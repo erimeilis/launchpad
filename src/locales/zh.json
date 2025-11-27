@@ -65,7 +65,7 @@
       "bottomLeft": "左下角",
       "bottomRight": "右下角",
       "triggerThreshold": "触发阈值（像素）",
-      "debounceDelay": "防抖延迟（毫秒）"
+      "debounceDelay": "停留时间（光标需要停留多久）"
     },
     "keyboardShortcuts": {
       "title": "键盘快捷键",

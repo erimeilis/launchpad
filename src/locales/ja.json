@@ -65,7 +65,7 @@
       "bottomLeft": "左下",
       "bottomRight": "右下",
       "triggerThreshold": "トリガーしきい値（ピクセル）",
-      "debounceDelay": "デバウンス遅延（ミリ秒）"
+      "debounceDelay": "滞在時間（カーソルが留まる必要がある時間）"
     },
     "keyboardShortcuts": {
       "title": "キーボードショートカット",

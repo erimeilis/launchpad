@@ -1,6 +1,6 @@
 [package]
 name = "launchpad"
-version = "0.8.2"
+version = "0.8.3"
 description = "macOS Launchpad recreation - Full-screen app launcher with folders and custom organization"
 authors = ["Launchpad Contributors"]
 license = "MIT"

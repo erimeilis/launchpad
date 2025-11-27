@@ -65,7 +65,7 @@
       "bottomLeft": "En Bas à Gauche",
       "bottomRight": "En Bas à Droite",
       "triggerThreshold": "Seuil de déclenchement (pixels)",
-      "debounceDelay": "Délai d'anti-rebond (ms)"
+      "debounceDelay": "Temps de maintien (durée requise du curseur)"
     },
     "keyboardShortcuts": {
       "title": "Raccourcis Clavier",
