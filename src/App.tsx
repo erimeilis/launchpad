@@ -298,20 +298,38 @@ function App() {
     setAppContextMenu,
   });
 
-  // Merge apps and folders into items array, applying persisted tag assignments
+  // Merge apps and folders into items array, using tagAssignments as single source of truth
   useEffect(() => {
     if (apps.length > 0) {
-      // Apply persisted tag assignments to apps
-      const appsWithTags = apps.map((app) => {
-        const savedTags = tagAssignments[app.bundle_id];
-        if (savedTags && savedTags.length > 0) {
-          // Merge persisted tags with any auto-tags from Rust
-          const autoTags = app.tags || [];
-          const mergedTags = [...new Set([...autoTags, ...savedTags])];
-          return { ...app, tags: mergedTags };
+      // Initialize tagAssignments for new apps with their auto-tags from Rust
+      const newAssignments: Record<string, string[]> = {};
+      let hasNewAssignments = false;
+
+      apps.forEach((app) => {
+        // Check if key EXISTS (not just truthy) - empty array means user removed all tags
+        if (!(app.bundle_id in tagAssignments)) {
+          // New app - initialize with auto-tags from Rust
+          newAssignments[app.bundle_id] = app.tags || [];
+          hasNewAssignments = true;
         }
-        return app;
       });
+
+      // Persist new app tags to localStorage
+      if (hasNewAssignments) {
+        const updatedAssignments = { ...tagAssignments, ...newAssignments };
+        setTagAssignments(updatedAssignments);
+        localStorage.setItem("launchpad-tag-assignments", JSON.stringify(updatedAssignments));
+      }
+
+      // Apply tags from tagAssignments (single source of truth)
+      const effectiveAssignments = hasNewAssignments
+        ? { ...tagAssignments, ...newAssignments }
+        : tagAssignments;
+
+      const appsWithTags = apps.map((app) => ({
+        ...app,
+        tags: effectiveAssignments[app.bundle_id] ?? [],
+      }));
 
       // Auto-create System and Utilities folders if they don't exist
       const updatedFolders = createSystemFolders(appsWithTags, folders);
@@ -651,7 +669,7 @@ function App() {
       }),
     );
 
-    // Persist tag assignment to localStorage
+    // Persist tag assignment to localStorage (single source of truth)
     setTagAssignments((prev) => {
       const currentTags = prev[bundleId] || [];
       const hasTag = currentTags.includes(tagKey);
@@ -659,12 +677,8 @@ function App() {
         ? currentTags.filter((t) => t !== tagKey)
         : [...currentTags, tagKey];
 
-      const updated = { ...prev };
-      if (newTags.length > 0) {
-        updated[bundleId] = newTags;
-      } else {
-        delete updated[bundleId]; // Clean up empty entries
-      }
+      // Always store the result, even if empty - empty array means "user removed all tags"
+      const updated = { ...prev, [bundleId]: newTags };
 
       localStorage.setItem("launchpad-tag-assignments", JSON.stringify(updated));
       return updated;
