@@ -75,10 +75,14 @@ export function useAppManagement() {
     });
   }, []);
 
-  // Set up event listeners for progressive icon loading
+  // Track if we're currently reloading to prevent concurrent reloads
+  const isReloadingRef = useRef(false);
+
+  // Set up event listeners for progressive icon loading and app changes
   useEffect(() => {
     let unlistenIcons: UnlistenFn | null = null;
     let unlistenComplete: UnlistenFn | null = null;
+    let unlistenAppsChanged: UnlistenFn | null = null;
 
     async function setupListeners() {
       // Listen for batched icon updates
@@ -90,6 +94,18 @@ export function useAppManagement() {
       unlistenComplete = await listen("icons-complete", () => {
         setIconsLoading(false);
       });
+
+      // Listen for app changes (new apps installed, apps removed)
+      unlistenAppsChanged = await listen("apps-changed", () => {
+        console.log("[useAppManagement] Apps changed, reloading...");
+        // Prevent concurrent reloads
+        if (!isReloadingRef.current) {
+          isReloadingRef.current = true;
+          loadApps().finally(() => {
+            isReloadingRef.current = false;
+          });
+        }
+      });
     }
 
     setupListeners();
@@ -97,6 +113,7 @@ export function useAppManagement() {
     return () => {
       if (unlistenIcons) unlistenIcons();
       if (unlistenComplete) unlistenComplete();
+      if (unlistenAppsChanged) unlistenAppsChanged();
     };
   }, [handleIconUpdates]);
 

@@ -9,9 +9,14 @@ use tauri::{Emitter, Manager};
 use walkdir::WalkDir;
 
 mod hot_corners;
+mod app_watcher;
+
 use hot_corners::{Corner, HotCornerConfig, HotCornerMonitor};
+use app_watcher::AppWatcher;
+use std::sync::Mutex;
 
 static HOT_CORNER_MONITOR: OnceLock<HotCornerMonitor> = OnceLock::new();
+static APP_WATCHER: OnceLock<Mutex<AppWatcher>> = OnceLock::new();
 
 /// Get the icon cache directory, creating it if it doesn't exist
 fn get_icon_cache_dir() -> Option<PathBuf> {
@@ -1214,6 +1219,15 @@ pub fn run() {
             );
             // DON'T start the monitor here - it will be started when user enables it in settings
             let _ = HOT_CORNER_MONITOR.set(monitor);
+
+            // Initialize app watcher to detect new/removed apps
+            let app_handle_watcher = app.handle().clone();
+            let mut watcher = AppWatcher::new(move || {
+                println!("[AppWatcher] Apps changed, emitting event");
+                let _ = app_handle_watcher.emit("apps-changed", ());
+            });
+            watcher.start();
+            let _ = APP_WATCHER.set(Mutex::new(watcher));
 
             // Register default global shortcut (F4)
             // Frontend will override this with user's saved preference if different
