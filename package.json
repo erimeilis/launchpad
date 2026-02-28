@@ -17,6 +17,7 @@
     "preview": "vite preview",
     "clean": "killall launchpad 2>/dev/null || true; lsof -ti:1420 | xargs kill -9 2>/dev/null || true",
     "tauri": "npm run clean && tauri",
+    "tauri:build": "npm run clean && tauri build && node scripts/copy-build.js",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\""
   },
@@ -35,10 +36,10 @@
     "@tauri-apps/cli": "^2",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
-    "@vitejs/plugin-react": "^4.6.0",
+    "@vitejs/plugin-react": "^5.1.4",
     "prettier": "^3.6.2",
     "tailwindcss": "^4.0.0",
-    "typescript": "~5.8.3",
+    "typescript": "^5.9.3",
     "vite": "^7.0.4"
   }
 }

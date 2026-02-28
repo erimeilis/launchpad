@@ -15,32 +15,32 @@ This opens the app in a debug window with live updates.
 Build an optimized, standalone `.app`:
 
 ```bash
-npm run tauri build
+npm run tauri:build
 ```
 
-### Build Output Locations
+### Build Output
 
-After building, you'll find:
+After building, you'll find the final artifacts in `build/`:
 
-- **Application Bundle**: `src-tauri/target/release/bundle/macos/launchpad.app`
-- **DMG Installer**: `src-tauri/target/release/bundle/dmg/launchpad_0.1.0_aarch64.dmg` (or x64)
+- **Application Bundle**: `build/Launchpad.app`
+- **DMG Installer**: `build/Launchpad_<version>_aarch64.dmg` (or x64)
 
 ## Testing the .app
 
 ### Method 1: Run Directly
 
 ```bash
-open src-tauri/target/release/bundle/macos/launchpad.app
+open build/Launchpad.app
 ```
 
 ### Method 2: Install to Applications
 
 ```bash
 # Copy to Applications folder
-cp -r src-tauri/target/release/bundle/macos/launchpad.app /Applications/
+cp -r build/Launchpad.app /Applications/
 
 # Then open from Spotlight or Finder
-open /Applications/launchpad.app
+open /Applications/Launchpad.app
 ```
 
 ### Method 3: Install from DMG
@@ -94,7 +94,8 @@ npm run tauri build
 | `npm run build`                                            | Build frontend only         |
 | `npm run tauri dev`                                        | Run full app in development |
 | `npm run tauri build`                                      | Build production .app       |
-| `open src-tauri/target/release/bundle/macos/launchpad.app` | Test the built app          |
+| `npm run tauri:build`                                      | Build and copy to `build/`  |
+| `open build/Launchpad.app`                                 | Test the built app          |
 
 ## Troubleshooting
 
@@ -111,7 +112,7 @@ npm run tauri build
 **App won't open?**
 
 - Check for errors: `open -a Console` and filter for "launchpad"
-- Run from terminal to see errors: `./src-tauri/target/release/bundle/macos/launchpad.app/Contents/MacOS/launchpad`
+- Run from terminal to see errors: `./build/Launchpad.app/Contents/MacOS/launchpad`
 
 ## 📄 License
 

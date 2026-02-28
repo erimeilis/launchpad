@@ -65,8 +65,8 @@ npm install
 # Run in development mode
 npm run tauri dev
 
-# Build production app
-npm run tauri build
+# Build production app (outputs to build/)
+npm run tauri:build
 ```
 
 ## 🎮 Usage
@@ -173,6 +173,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 - [x] Custom tag creation with icons
 - [x] Auto-categorization (system tags based on app type)
 - [x] **Performance optimization** - Progressive icon loading with caching and parallel processing
+- [x] **Live app sync** - Automatically detects newly installed or removed apps
 
 **Planned:**
 - [ ] iCloud sync for app layouts
